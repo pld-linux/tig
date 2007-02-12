@@ -1,5 +1,5 @@
 Summary:	Text-mode interface for git-core
-Summary(pl):	Tekstowy interfejs do git-core
+Summary(pl.UTF-8):   Tekstowy interfejs do git-core
 Name:		tig
 Version:	0.5
 Release:	1
@@ -24,15 +24,15 @@ and showing the commit with the log message, diffstat, and the diff.
 
 Using it as a pager, it will display input from stdin and colorize it.
 
-%description -l pl
-Tig jest przegl±dark± repozytoriów git-core'a. Dodatkowo mo¿e dzia³aæ
-jako pager dla ró¿nych komend gita.
+%description -l pl.UTF-8
+Tig jest przeglÄ…darkÄ… repozytoriÃ³w git-core'a. Dodatkowo moÅ¼e dziaÅ‚aÄ‡
+jako pager dla rÃ³Å¼nych komend gita.
 
-Podczas przegl±dania repozytoriów u¿ywa poleceñ gita i pokazuje log,
-statystyki diffa i ró¿nice miêdzy plikami.
+Podczas przeglÄ…dania repozytoriÃ³w uÅ¼ywa poleceÅ„ gita i pokazuje log,
+statystyki diffa i rÃ³Å¼nice miÄ™dzy plikami.
 
-U¿ywany jako pager bêdzie kolorowa³ to co otrzyma ze standardowego
-wej¶cia.
+UÅ¼ywany jako pager bÄ™dzie kolorowaÅ‚ to co otrzyma ze standardowego
+wejÅ›cia.
 
 %prep
 %setup -q
