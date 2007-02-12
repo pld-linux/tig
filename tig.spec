@@ -1,5 +1,5 @@
 Summary:	Text-mode interface for git-core
-Summary(pl.UTF-8):   Tekstowy interfejs do git-core
+Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
 Version:	0.5
 Release:	1
