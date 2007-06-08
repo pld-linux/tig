@@ -1,12 +1,12 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	0.5
+Version:	0.7
 Release:	1
 License:	GPL v2
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	fab4a728d13b8eb0643a1f5c26c0b8c9
+# Source0-md5:	3774b673e1180461fb003378908604e9
 Patch0:		%{name}-ncurses.patch
 URL:		http://jonas.nitro.dk/tig/
 BuildRequires:	asciidoc
