@@ -1,12 +1,12 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	0.7
+Version:	0.8
 Release:	1
 License:	GPL v2
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	3774b673e1180461fb003378908604e9
+# Source0-md5:	9abe5685b862c758f53e32cdbe1fdb8f
 Patch0:		%{name}-ncurses.patch
 URL:		http://jonas.nitro.dk/tig/
 BuildRequires:	asciidoc
@@ -39,18 +39,17 @@ wejścia.
 %patch0 -p1
 
 %build
-%{__make} CC="%{__cc}" CFLAGS="%{rpmcflags} %{rpmldflags}"
+%{__make} \
+	CC="%{__cc}" \
+	CFLAGS="%{rpmcflags} %{rpmldflags}"
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-install -d $RPM_BUILD_ROOT{%{_bindir},%{_mandir}/man{1,5}}
-%{__make} install \
+%{__make} install install-doc-man \
 	DESTDIR=$RPM_BUILD_ROOT \
+	mandir=%{_mandir} \
 	prefix=%{_prefix}
-
-install tig.1 $RPM_BUILD_ROOT%{_mandir}/man1
-install tigrc.5 $RPM_BUILD_ROOT%{_mandir}/man5
 
 %clean
 rm -rf $RPM_BUILD_ROOT
