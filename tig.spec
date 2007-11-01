@@ -1,13 +1,12 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	0.8
+Version:	0.9.1
 Release:	1
 License:	GPL v2
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	9abe5685b862c758f53e32cdbe1fdb8f
-Patch0:		%{name}-ncurses.patch
+# Source0-md5:	b596682b3cd5892db22d7168d6f99bd1
 URL:		http://jonas.nitro.dk/tig/
 BuildRequires:	asciidoc
 BuildRequires:	ncurses-devel
@@ -34,28 +33,47 @@ statystyki diffa i różnice między plikami.
 Używany jako pager będzie kolorował to co otrzyma ze standardowego
 wejścia.
 
+%package -n bash-completion-tig
+Summary:	bash-completion for tig
+Summary(pl.UTF-8):	bashowe uzupełnianie nazw dla tiga
+Group:		Applications/Shell
+Requires:	bash-completion
+
+%description -n bash-completion-tig
+This package provides bash-completion for tig.
+
+%description -n bash-completion-tig -l pl.UTF-8
+Pakiet ten dostarcza bashowe uzupełnianie nazw dla tiga.
+
 %prep
 %setup -q
-%patch0 -p1
 
 %build
 %{__make} \
 	CC="%{__cc}" \
-	CFLAGS="%{rpmcflags} %{rpmldflags}"
+	CFLAGS="%{rpmcflags} %{rpmldflags} -I/usr/include/ncurses"
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
 
 %{__make} install install-doc-man \
 	DESTDIR=$RPM_BUILD_ROOT \
 	mandir=%{_mandir} \
 	prefix=%{_prefix}
 
+# bash completion
+install contrib/tig-completion.bash $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc TODO *.html
+%doc TODO *.html contrib/tigrc
 %attr(755,root,root) %{_bindir}/*
 %{_mandir}/man*/*
+
+%files -n bash-completion-tig
+%defattr(644,root,root,755)
+%{_sysconfdir}/bash_completion.d/tig-completion.bash
