@@ -1,13 +1,14 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	0.9.1
-Release:	2
+Version:	0.10.1
+Release:	1
 License:	GPL v2
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	b596682b3cd5892db22d7168d6f99bd1
+# Source0-md5:	ff2c0c3d34b52a665421684d1fe7c221
 URL:		http://jonas.nitro.dk/tig/
+Patch0:		tig-git.patch
 BuildRequires:	asciidoc
 BuildRequires:	ncurses-devel
 Requires:	git-core
@@ -47,6 +48,7 @@ Pakiet ten dostarcza bashowe uzupełnianie nazw dla tiga.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %{__make} \
@@ -71,7 +73,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc TODO *.html contrib/tigrc
+%doc BUGS README TODO *.html contrib/tigrc
 %attr(755,root,root) %{_bindir}/*
 %{_mandir}/man*/*
 
