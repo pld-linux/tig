@@ -1,1701 +1,1038 @@
-diff --git a/INSTALL b/INSTALL
-index 85662a3..3f6ff92 100644
---- a/INSTALL
-+++ b/INSTALL
-@@ -23,6 +23,10 @@ need to first make the configure script:
- 
- 	$ make configure
- 
-+Release notes documenting notable changes are available in the NEWS file. When
-+upgrading, you are adviced to also read them after you have completed the
-+installation.
-+
- The following tools and packages are needed:
- 
- `-------------------------------`----------------------------------------------
-diff --git a/Makefile b/Makefile
-index 575c5bf..1107f95 100644
---- a/Makefile
-+++ b/Makefile
-@@ -37,7 +37,7 @@ CFLAGS ?= -Wall -O2
- DFLAGS	= -g -DDEBUG -Werror
- PROGS	= tig
- MANDOC	= tig.1 tigrc.5
--HTMLDOC = tig.1.html tigrc.5.html manual.html README.html
-+HTMLDOC = tig.1.html tigrc.5.html manual.html README.html NEWS.html
- ALLDOC	= $(MANDOC) $(HTMLDOC) manual.html-chunked manual.pdf
- 
- # Never include the release number in the tarname for tagged
-@@ -99,8 +99,9 @@ clean:
- 	$(RM) $(PROGS) core *.o *.xml
- 
- distclean: clean
--	$(RM) -r manual.html-chunked *.toc $(ALLDOC)
--	$(RM) -r autom4te.cache aclocal.m4 config.{h,log,make,status} config.h.in configure
-+	$(RM) -r manual.html-chunked autom4te.cache
-+	$(RM) *.toc $(ALLDOC) aclocal.m4 configure
-+	$(RM) config.h config.log config.make config.status config.h.in
- 
- spell-check:
- 	aspell --lang=en --check tig.1.txt tigrc.5.txt manual.txt
-@@ -162,6 +163,9 @@ manual.toc: manual.txt
- README.html: README asciidoc.conf
- 	$(ASCIIDOC) $(ASCIIDOC_FLAGS) -b xhtml11 -d article -a readme $<
- 
-+NEWS.html: NEWS asciidoc.conf
-+	$(ASCIIDOC) $(ASCIIDOC_FLAGS) -b xhtml11 -d article $<
-+
- %.1.html : %.1.txt asciidoc.conf
- 	$(ASCIIDOC) $(ASCIIDOC_FLAGS) -b xhtml11 -d manpage $<
- 
 diff --git a/NEWS b/NEWS
-new file mode 100644
-index 0000000..d93fb04
---- /dev/null
+index 7e219af..a0f75c6 100644
+--- a/NEWS
 +++ b/NEWS
-@@ -0,0 +1,159 @@
-+Release notes
-+=============
-+
-+tig master branch
-+-----------------
-+
-+Improvements:
-+
-+ - F5 also refreshes the current view.
-+ - Allow line graphics to be disabled with new line-graphics option.
-+ - Main view: also include the reference names when searching.
-+ - Stage view: add stage-next action to jump to next diff chunk that can
-+   be staged. By default bound to '@'.
-+ - Configure: check for the ncurses header files.
-+ - Add author-width option to costumize the width of the author column.
-+   For example, put the following in ~/.tigrc: set author-width = 10
-+
-+Bug fixes:
-+
-+ - Fix regression when staging all diff chunks in a section.
-+ - Bind the maximize view action to 'O'; it conflicted with the
-+   keybinding to launch the merge tool in the status view.
-+ - Fix problem with $(cmd) usage in shell code. Some shells (jsh)
-+   installed as /bin/sh does not support it.
-+ - Do not show incomplete boundary commits when --no-walk is used.
-+ - Documentation: Rename gitlink macro to support AsciiDoc 8.2.3.
-+
-+tig-0.11
-+--------
-+
-+Incompatibilities:
-+
-+ - Remove parsing of deprecated options: -g, -l, -d.
-+ - The first seen '--' will stop option parsing and is passed to git
-+   instead of breaking out of tig's option parsing.
-+
-+New features:
-+
-+ - Blame view; bound to 'B' by default, reachable from the command line
-+   and the tree, status, and stage views.
-+ - Blame/main view: allow display of date, author, and references to be
-+   toggled on/off. Bound to 'D', 'A', and 'F' respectively.
-+ - Add action to maximize the current view.
-+
-+Improvements:
-+
-+ - Show the current branch in the status view.
-+ - Show local/light-weight tags.
-+
-+Bug fixes:
-+
-+ - Fix regressions for the pager mode.
-+ - Fix refreshing of the index with working directory info.
-+
-+tig-0.10.1
+@@ -1,6 +1,21 @@
+ Release notes
+ =============
+ 
++tig master
 +----------
 +
 +Improvements:
 +
-+ - Status view: detect renamed files and show them with 'R'.
-+ - Status view: refresh the index to avoid "empty diffs".
-+ - Diff view: make diff headers more verbose to include e.g. committer.
-+ - Configure: check for the ncursesw library.
++ - Display repository references in the sorted order: tags, heads,
++   tracked remotes, remotes.
++ - Add bash completion for blame.
 +
 +Bug fixes:
 +
-+ - Fix UTF8 handling for tag names and commit messages.
-+ - Fix the check for git-config(1) in configure to handle the case when
-+   git has been installed using a libexecdir which is not in the path.
-+ - Fix replacing of SYSCONFDIR when installing from released tarballs.
++ - Separate blame revision and file argument by "--" to avoid problems.
++ - Main view: fix redrawing of the last commit wrt. the revision graph.
++ - Fix waiting for input after executing a run request in pager mode.
 +
-+tig-0.10
-+---------
-+
-+Incompatibilities:
-+
-+ - Deprecate most tig specific command line options to make tig more
-+   compatible with gitk. The deprecated options are: -g, -l, -d, and -S.
-+   Use of any of them will result in a warning being printed to stderr.
-+   Instead of '-S', use the new 'status' subcommand.
-+ - Make man page building depend on DocBook XSL version >= 1.72.0.
-+ - Install man pages in $(prefix)/share/man.
-+ - Implement the cherry pick action (bound to 'C') using new support for
-+   running external commands. This obsoletes the TIG_CHEERY_PICK
-+   environment variable
-+
-+New features:
-+
-+ - Add support for binding keys to external commands. To bind '.' to
-+   running git-commit(1), add the line: "bind generic . !git commit" to
-+   your ~/.tigrc. Each command can have replacement string such as
-+   %(commit), %(head), and %(blob), which are substituted before the
-+   command is run.
-+ - Add system-wide configuration file defaulting to $(prefix)/etc/tigrc.
-+ - Add the environment variables TIGRC_USER and TIGRC_SYSTEM to change
-+   user and system-wide configuration files, respectively.
-+
-+Improvements:
-+
-+ - Main view: color the revision graph.
-+ - Main view: show boundary commits; they are marked with '^' in the
-+   revision graph.
-+ - Tree view: add tree-parent action to jump to view of the parent tree.
-+   Bound to ',' by default.
-+ - Allow the default terminal colors to be overwritten. To use black
-+   text on white, add the line "color default white black" to your
-+   ~/.tigrc.
-+ - Misc. documentation improvements.
-+
-+Bug fixes:
-+
-+ - Use git-diff-index(1) and git-diff-files(1) instead of git-diff(1) to
-+   avoid running external diff drivers.
-+ - Use --no-color when calling git-log(1).
-+ - Fix crash when opening mergetool for lines that are not unmerged.
-+
-+tig-0.9.1
-+---------
-+
-+Incompatibilities:
-+
-+ - Make the clean rule to never remove generated documentation files.
-+   Use the distclean rule for accomplishing this.
-+
-+New features:
-+
-+ - Add support for cherry-picking commits in the main view to the
-+   current branch. Bound to 'C' by default.
-+
-+Improvements:
-+
-+ - Add support for launching git-mergetool(1) from the status view.
-+   Bound to 'M' by default.
-+ - Add support for refreshing/reloading the status view
-+ - Detect working trees and disable the status view when it is missing.
-+
-+Bug fixes:
-+
-+ - Fix iconv() checking in configure.
-+ - Fix editor invocation to make paths relative to the project root.
-+ - Fix out-of-range current line when reloading the status view.
-+ - Include autoconf files in the tarball generated by `make dist`.
-+
-+tig-0.9
-+-------
-+
-+New features:
-+
-+ - Add bash completion script for tig (contrib/tig-completion.bash).
-+ - Add optional autoconf-based build infrastructure.
-+ - Add stage view for showing changes in the working tree and add
-+   support for staging individual diff chunks for commit.
-+
-+Improvements:
-+
-+ - Status view: allow all files in a section to be staged for commit.
-+ - Status view: Add support for opening files in an editor. Bound to 'e'
-+   by default.
-+ - Tree view: use a stack for remembering the lines for parent tree.
-diff --git a/TODO b/TODO
-index 437f0d4..919734a 100644
---- a/TODO
-+++ b/TODO
-@@ -28,3 +28,6 @@ Features that should be explored.
+ tig-0.12.1
+ ----------
  
-  - Color the revgraph to make it easier to follow branches. Idea by
-    Dominik Vogt
+diff --git a/contrib/tig-completion.bash b/contrib/tig-completion.bash
+index 79b414b..40bfcfa 100755
+--- a/contrib/tig-completion.bash
++++ b/contrib/tig-completion.bash
+@@ -182,6 +182,26 @@ _tig_options ()
+ 	__tig_complete_revlist
+ }
+ 
++_tig_blame ()
++{
++	local reply="" ref=HEAD cur="${COMP_WORDS[COMP_CWORD]}"
 +
-+ - Allow names in the author column to be abbreviated to initials.
-+   Will optimize screen usage for the blame view.
-diff --git a/asciidoc.conf b/asciidoc.conf
-index 630552c..90fdb6a 100644
---- a/asciidoc.conf
-+++ b/asciidoc.conf
-@@ -1,5 +1,5 @@
- ifdef::backend-docbook[]
--[gitlink-inlinemacro]
-+[manpage-inlinemacro]
- {0%{target}}
- {0#<citerefentry>}
- {0#<refentrytitle>{target}</refentrytitle><manvolnum>{0}</manvolnum>}
-@@ -7,7 +7,7 @@ ifdef::backend-docbook[]
- endif::backend-docbook[]
- 
- ifdef::backend-xhtml11[]
--[gitlink-inlinemacro]
-+[manpage-inlinemacro]
- <a href="{target}{0?.{0}}.html">{target}{0?({0})}</a>
- endif::backend-xhtml11[]
- 
-@@ -56,4 +56,7 @@ ifdef::readme[]
- 
- [footer]
- </div>
++	if test "$COMP_CWORD" -lt 3; then
++		reply="$(__tig_refs)"
++	else
++		ref="${COMP_WORDS[2]}"
++	fi
 +
-+[replacements]
-+(^|[^-\\])--($|[^-])=\1--\2
- endif::readme[]
-diff --git a/configure.ac b/configure.ac
-index 764190a..6b0fc45 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -1,13 +1,23 @@
--AC_INIT([tig], [0],
--	[Jonas Fonseca <fonseca@diku.dk>],
--	[tig])
-+AC_INIT([tig], [0], [Jonas Fonseca <fonseca@diku.dk>], [tig])
- 
- AC_LANG([C])
- AC_CONFIG_HEADER(config.h)
- AC_CONFIG_SRCDIR(tig.c)
- 
--AC_SEARCH_LIBS([wclear], [ncursesw ncurses curses], [],
--	       [AC_ERROR([curses not found])])
-+cursed=no
-+AC_CHECK_HEADERS([ncursesw/ncurses.h],
-+		 [AC_SEARCH_LIBS([initscr], [ncursesw], [cursed=yes])])
-+case "$cursed" in "no")
-+	AC_CHECK_HEADERS([ncurses/ncurses.h ncurses.h],
-+			 [AC_SEARCH_LIBS([wclear], [ncurses], [cursed=yes])])
++	reply="$reply $(git --git-dir="$(__tigdir)" ls-tree "$ref" \
++			| sed '/^100... blob /s,^.*	,,
++			       /^040000 tree /{
++			           s,^.*	,,
++			           s,$,/,
++			       }
++			       s/^.*	//')"
++	_tigcomp "$reply"
++}
 +
-+	case "$cursed" in "no")
-+		AC_ERROR([ncurses not found])
-+	esac
-+
-+	AC_MSG_WARN([The found ncurses library does not support wide-char.])
-+	AC_MSG_WARN([This means that tig will not correctly render UTF-8.])
-+esac
+ _tig_show ()
+ {
+ 	local cur="${COMP_WORDS[COMP_CWORD]}"
+@@ -218,12 +238,13 @@ _tig ()
+ 		case "${COMP_WORDS[COMP_CWORD]}" in
+ 		--*=*) COMPREPLY=() ;;
+ 		-*)   _tig_options ;;
+-		*)    _tigcomp "status show $(__tig_refs)" ;;
++		*)    _tigcomp "blame status show $(__tig_refs)" ;;
+ 		esac
+ 		return
+ 	fi
  
- AM_ICONV
- 
-@@ -26,9 +36,3 @@ AC_CHECK_PROGS(DOCBOOK2PDF, [docbook2pdf false])
- 
- AC_CONFIG_FILES([config.make])
- AC_OUTPUT
--
--case "$LIBS" in
--*-lncursesw*) ;;
--*) AC_MSG_RESULT([NOTE: The found ncurses library does not support wide-char.])
--   AC_MSG_RESULT([NOTE: This means that tig will not correctly render UTF-8])
--esac
+ 	case "$command" in
++	blame)  _tig_blame ;;
+ 	show)   _tig_show ;;
+ 	status) ;;
+ 	*)	_tigcomp "
 diff --git a/manual.txt b/manual.txt
-index e4f937a..3157eb3 100644
+index f11b77a..447dec0 100644
 --- a/manual.txt
 +++ b/manual.txt
-@@ -366,6 +366,7 @@ u	Update status of file. In the status view, this allows you to add an \
- M	Resolve unmerged file by launching git-mergetool(1). Note, to work \
- 	correctly this might require some initial configuration of your \
- 	preferred merge tool. See the manpage of git-mergetool(1).
-+@	Move to next chunk in the stage view.
- ','	Move tree view to the parent tree.
- e	Open file in editor.
+@@ -44,7 +44,7 @@ given command and all will be shell quoted before they are passed to the
+ shell.
+ 
+ NOTE: If you specify options for the main view, you should not use the
+-`--pretty` option as this option will be set automatically to the format
++`\--pretty` option as this option will be set automatically to the format
+ expected by the main view.
+ 
+ Example on how to view a commit and show both author and committer
+@@ -54,100 +54,10 @@ information:
+ $ tig show --pretty=fuller
  -----------------------------------------------------------------------------
-@@ -526,8 +527,8 @@ References and Related Tools
  
- Manpages:
+-See the <<refspec, "Specifying revisions">> section below for an introduction
+-to revision options supported by the git commands. For details on specific git
++See the section on <<refspec, specifying revisions>> for an introduction to
++revision options supported by the git commands. For details on specific git
+ command options, refer to the man page of the command in question.
  
-- - gitlink:tig[1]
-- - gitlink:tigrc[5]
-+ - manpage:tig[1]
-+ - manpage:tigrc[5]
+-[[env-variables]]
+-Environment Variables
+----------------------
+-
+-Several options related to the interface with git can be configured via
+-environment options.
+-
+-[[configuration-files]]
+-Configuration Files
+-~~~~~~~~~~~~~~~~~~~
+-
+-Upon startup, tig first reads the system wide configuration file
+-(`{sysconfdir}/tigrc` by default) and then proceeds to read the user's
+-configuration file (`~/.tigrc` by default). The paths to either of these files
+-can be overridden through the following environment variables:
+-
+-TIGRC_USER::
+-	Path of the user configuration file.
+-
+-TIGRC_SYSTEM::
+-	Path of the system wide configuration file.
+-
+-[[repo-refs]]
+-Repository References
+-~~~~~~~~~~~~~~~~~~~~~
+-
+-Commits that are referenced by tags and branch heads will be marked by the
+-reference name surrounded by '[' and ']':
+-
+------------------------------------------------------------------------------
+-2006-03-26 19:42 Petr Baudis         | [cogito-0.17.1] Cogito 0.17.1
+------------------------------------------------------------------------------
+-
+-If you want to filter out certain directories under `.git/refs/`, say `tmp`
+-you can do it by setting the following variable:
+-
+------------------------------------------------------------------------------
+-$ TIG_LS_REMOTE="git ls-remote . | sed /\/tmp\//d" tig
+------------------------------------------------------------------------------
+-
+-Or set the variable permanently in your environment.
+-
+-TIG_LS_REMOTE::
+-	Set command for retrieving all repository references. The command
+-	should output data in the same format as git-ls-remote(1).
+-
+-[[history-commands]]
+-History Commands
+-~~~~~~~~~~~~~~~~
+-
+-It is possible to alter which commands are used for the different views.  If
+-for example you prefer commits in the main view to be sorted by date and only
+-show 500 commits, use:
+-
+------------------------------------------------------------------------------
+-$ TIG_MAIN_CMD="git log --date-order -n500 --pretty=raw %s" tig
+------------------------------------------------------------------------------
+-
+-Or set the variable permanently in your environment.
+-
+-Notice, how `%s` is used to specify the commit reference. There can be a
+-maximum of 5 `%s` ref specifications.
+-
+-TIG_DIFF_CMD::
+-	The command used for the diff view. By default, git show is used
+-	as a backend.
+-
+-TIG_LOG_CMD::
+-	The command used for the log view. If you prefer to have both
+-	author and committer shown in the log view be sure to pass
+-	`--pretty=fuller` to git log.
+-
+-TIG_MAIN_CMD::
+-	The command used for the main view. Note, you must always specify
+-	the option: `--pretty=raw` since the main view parser expects to
+-	read that format.
+-
+-[[tree-commands]]
+-Tree Commands
+-~~~~~~~~~~~~~
+-
+-TIG_TREE_CMD::
+-	The command used for the tree view. Takes two arguments, the first
+-	is the revision ID and the second is the path of the directory tree,
+-	empty for the root directory. Defaults to "git ls-tree %s %s".
+-
+-TIG_BLOB_CMD::
+-	The command used for the blob view. Takes one argument which is
+-	the blob ID. Defaults to "git cat-file blob %s".
+-
+ [[viewer]]
+ The Viewer
+ ----------
+@@ -167,18 +77,6 @@ You will split the view so that the log view is displayed in the top window
+ and the diff view in the bottom window. You can switch between the two views
+ by pressing 'Tab'. To maximize the log view again, simply press 'l'.
  
- Online resources:
+-[[commit-id]]
+-Current Head and Commit ID
+-~~~~~~~~~~~~~~~~~~~~~~~~~~
+-
+-The viewer keeps track of both what head and commit ID you are currently
+-viewing. The commit ID will follow the cursor line and change every time
+-you highlight a different commit. Whenever you reopen the diff view it will be
+-reloaded, if the commit ID changed.
+-
+-The head ID is used when opening the main and log view to indicate from what
+-revision to show history.
+-
+ [[views]]
+ Views
+ ~~~~~
+@@ -226,7 +124,30 @@ The pager view::
+ 	commands entered in the internal prompt.
  
-diff --git a/tig.1.txt b/tig.1.txt
-index ee96a97..6a7e266 100644
---- a/tig.1.txt
-+++ b/tig.1.txt
-@@ -135,7 +135,7 @@ TIG_BLOB_CMD::
- FILES
- -----
- '~/.tigrc'::
--	User configuration file. See gitlink:tigrc[5] for examples.
-+	User configuration file. See manpage:tigrc[5] for examples.
+ The help view::
+-	Displays key binding quick reference.
++	Displays a quick reference of key bindings.
++
++[[commit-id]]
++Browsing State and User-defined Commands
++~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
++The viewer keeps track of both what head and commit ID you are currently
++viewing. The commit ID will follow the cursor line and change every time you
++highlight a different commit. Whenever you reopen the diff view it will be
++reloaded, if the commit ID changed. The head ID is used when opening the main
++and log view to indicate from what revision to show history.
++
++Some of the commands used or provided by tig can be configured. This goes for
++the <<external-commands, external commands>>. These user-defined commands can
++use arguments that refer to the current browsing state by using one of the
++following variables.
++
++`-----------------------`-----------------------------------------------------
++Browsing state variables
++------------------------------------------------------------------------------
++%(head)			The currently viewed 'head' ID. Defaults to HEAD
++%(commit)		The currently selected commit ID.
++%(blob)			The currently selected blob ID.
++------------------------------------------------------------------------------
  
- '{sysconfdir}/tigrc'::
- 	System wide configuration file.
-@@ -158,7 +158,7 @@ the Free Software Foundation; either version 2 of the License, or
- SEE ALSO
- --------
+ [[title-window]]
+ Title Windows
+@@ -247,6 +168,134 @@ be appended:
+ [main] 77d9e40fbcea3238015aea403e06f61542df9a31 - commit 1 of 779 (0%) 5s
+ -----------------------------------------------------------------------------
  
--gitlink:tigrc[5], git(7), cogito(7), as well as other git repository browsers:
-+manpage:tigrc[5], git(7), cogito(7), as well as other git repository browsers:
- gitk(1), qgit(1), gitview(1).
++[[env-variables]]
++Environment Variables
++---------------------
++
++Several options related to the interface with git can be configured via
++environment options.
++
++[[configuration-files]]
++Configuration Files
++~~~~~~~~~~~~~~~~~~~
++
++Upon startup, tig first reads the system wide configuration file
++(`{sysconfdir}/tigrc` by default) and then proceeds to read the user's
++configuration file (`~/.tigrc` by default). The paths to either of these files
++can be overridden through the following environment variables:
++
++TIGRC_USER::
++	Path of the user configuration file.
++
++TIGRC_SYSTEM::
++	Path of the system wide configuration file.
++
++[[repo-refs]]
++Repository References
++~~~~~~~~~~~~~~~~~~~~~
++
++Commits that are referenced by tags and branch heads will be marked by the
++reference name surrounded by '[' and ']':
++
++-----------------------------------------------------------------------------
++2006-03-26 19:42 Petr Baudis         | [cogito-0.17.1] Cogito 0.17.1
++-----------------------------------------------------------------------------
++
++If you want to filter what branches gets shown, say limit to only show
++branches named `master` or which starts with the `jf/` prefix, you can
++do it by setting the following variable:
++
++-----------------------------------------------------------------------------
++$ TIG_LS_REMOTE="git ls-remote . master jf/*" tig
++-----------------------------------------------------------------------------
++
++Or set the variable permanently in your environment.
++
++--
++
++TIG_LS_REMOTE::
++
++	Set command for retrieving all repository references. The command
++	should output data in the same format as git-ls-remote(1). Defaults
++	to:
++-----------------------------------------------------------------------------
++git ls-remote .
++-----------------------------------------------------------------------------
++
++--
++
++[[history-commands]]
++History Commands
++~~~~~~~~~~~~~~~~
++
++It is possible to alter which commands are used for the different views.  If
++for example you prefer commits in the main view to be sorted by date and only
++show 500 commits, use:
++
++-----------------------------------------------------------------------------
++$ TIG_MAIN_CMD="git log --date-order -n500 --pretty=raw %s" tig
++-----------------------------------------------------------------------------
++
++Or set the variable permanently in your environment.
++
++Notice, how `%s` is used to specify the commit reference. There can be a
++maximum of 5 `%s` ref specifications.
++
++--
++
++TIG_DIFF_CMD::
++
++	The command used for the diff view. Defaults to:
++-----------------------------------------------------------------------------
++git show --pretty=fuller --no-color --root 
++	 --patch-with-stat --find-copies-harder -C %s
++-----------------------------------------------------------------------------
++
++TIG_LOG_CMD::
++
++	The command used for the log view. If you prefer to have both
++	author and committer shown in the log view be sure to pass
++	`\--pretty=fuller` to git log. Defaults to:
++-----------------------------------------------------------------------------
++git log --no-color --cc --stat -n100 %s
++-----------------------------------------------------------------------------
++
++TIG_MAIN_CMD::
++
++	The command used for the main view. Note, you must always specify
++	the option: `\--pretty=raw` since the main view parser expects to
++	read that format.
++-----------------------------------------------------------------------------
++git log --no-color --pretty=raw --parents --topo-order %s
++-----------------------------------------------------------------------------
++
++--
++
++[[tree-commands]]
++Tree Commands
++~~~~~~~~~~~~~
++
++--
++
++TIG_TREE_CMD::
++
++	The command used for the tree view. Takes two arguments, the first is
++	the revision ID and the second is the path of the directory tree,
++	empty for the root directory. Defaults to:
++-----------------------------------------------------------------------------
++git ls-tree %s %s
++-----------------------------------------------------------------------------
++
++TIG_BLOB_CMD::
++
++	The command used for the blob view. Takes one argument which is the
++	blob ID. Defaults to:
++-----------------------------------------------------------------------------
++git cat-file blob %s
++-----------------------------------------------------------------------------
++
++--
++
+ [[keys]]
+ Default Keybindings
+ -------------------
+@@ -377,9 +426,10 @@ e	Open file in editor.
+ External Commands
+ ~~~~~~~~~~~~~~~~~
  
- Online resources:
+-Tig also comes with a few builtin external commands. These are simple shell
+-commands that are run and can take arguments from the current browsing state,
+-such as the current commit ID. The default commands are:
++For more custom needs, external commands provide a way to easily execute
++a script or program. They are bound to keys and use information from the
++current browsing state, such as the current commit ID. Tig comes with
++the following builtin external commands:
+ 
+ `-------`--------------------------------------------------------------------
+ Key	Action
+@@ -400,7 +450,7 @@ git-rev-list(1).
+ 
+ You can tune the interaction with git by making use of the options explained
+ in this section. For example, by configuring the environment variables
+-described in the  <<history-commands, "History commands">> section.
++described in the section on <<history-commands, history commands>>.
+ 
+ [[path-limiting]]
+ Limit by Path Name
+@@ -422,17 +472,13 @@ thus you will have to use:
+ $ tig -- status
+ -----------------------------------------------------------------------------
+ 
+-NOTE: For the main view, avoiding ambiguity will in some cases require you to
+-specify two "\--" options. The first will make tig stop option processing
+-and the latter will be passed to git log.
+-
+ [[date-number-limiting]]
+ Limit by Date or Number
+ ~~~~~~~~~~~~~~~~~~~~~~~
+ 
+ To speed up interaction with git, you can limit the amount of commits to show
+ both for the log and main view. Either limit by date using e.g.
+-`--since=1.month` or limit by the number of commits using `-n400`.
++`\--since=1.month` or limit by the number of commits using `-n400`.
+ 
+ If you are only interested in changed that happened between two dates you can
+ use:
+@@ -442,7 +488,7 @@ $ tig --after="May 5th" --before="2006-05-16 15:44"
+ -----------------------------------------------------------------------------
+ 
+ NOTE: If you want to avoid having to quote dates containing spaces you can use
+-"." instead, e.g. `--after=May.5th`.
++"." instead, e.g. `\--after=May.5th`.
+ 
+ [[commit-range-limiting]]
+ Limiting by Commit Ranges
 diff --git a/tig.c b/tig.c
-index 5280da8..8362ecf 100644
+index 5c456e7..3394d40 100644
 --- a/tig.c
 +++ b/tig.c
-@@ -45,7 +45,15 @@
- /* ncurses(3): Must be defined to have extended wide-character functions. */
- #define _XOPEN_SOURCE_EXTENDED
+@@ -164,7 +164,7 @@ struct ref {
+ 	unsigned int next:1;	/* For ref lists: are there more refs? */
+ };
  
--#include <curses.h>
-+#ifdef HAVE_NCURSESW_NCURSES_H
-+#include <ncursesw/ncurses.h>
-+#else
-+#ifdef HAVE_NCURSES_NCURSES_H
-+#include <ncurses/ncurses.h>
-+#else
-+#include <ncurses.h>
-+#endif
-+#endif
+-static struct ref **get_refs(char *id);
++static struct ref **get_refs(const char *id);
  
- #if __GNUC__ >= 3
- #define __NORETURN __attribute__((__noreturn__))
-@@ -58,7 +66,7 @@ static void warn(const char *msg, ...);
- static void report(const char *msg, ...);
- static int read_properties(FILE *pipe, const char *separators, int (*read)(char *, size_t, char *, size_t));
- static void set_nonblocking_input(bool loading);
--static size_t utf8_length(const char *string, size_t max_width, int *trimmed, bool reserve);
-+static size_t utf8_length(const char *string, int *width, size_t max_width, int *trimmed, bool reserve);
+ struct int_map {
+ 	const char *name;
+@@ -277,6 +277,9 @@ string_enum_compare(const char *str1, const char *str2, int len)
+ 	return 0;
+ }
  
- #define ABS(x)		((x) >= 0  ? (x) : -(x))
- #define MIN(x, y)	((x) < (y) ? (x) :  (y))
-@@ -77,7 +85,6 @@ static size_t utf8_length(const char *string, size_t max_width, int *trimmed, bo
- #define REVGRAPH_BRANCH	'+'
- #define REVGRAPH_COMMIT	'*'
- #define REVGRAPH_BOUND	'^'
--#define REVGRAPH_LINE	'|'
++#define prefixcmp(str1, str2) \
++	strncmp(str1, str2, STRING_SIZE(str2))
++
+ /* Shell quoting
+  *
+  * NOTE: The following is a slightly modified copy of the git project's shell
+@@ -408,9 +411,9 @@ enum request {
  
- #define SIZEOF_REVGRAPH	19	/* Size of revision ancestry graphics. */
+ struct request_info {
+ 	enum request request;
+-	char *name;
++	const char *name;
+ 	int namelen;
+-	char *help;
++	const char *help;
+ };
  
-@@ -99,7 +106,7 @@ static size_t utf8_length(const char *string, size_t max_width, int *trimmed, bo
- /* The default interval between line numbers. */
- #define NUMBER_INTERVAL	5
- 
--#define TABSIZE		8
-+#define TAB_SIZE	8
- 
- #define	SCALE_SPLIT_VIEW(height)	((height) * 2 / 3)
- 
-@@ -110,7 +117,7 @@ static size_t utf8_length(const char *string, size_t max_width, int *trimmed, bo
- #endif
- 
- #define TIG_LS_REMOTE \
--	"git ls-remote $(git rev-parse --git-dir) 2>/dev/null"
-+	"git ls-remote . 2>/dev/null"
- 
- #define TIG_DIFF_CMD \
- 	"git show --pretty=fuller --no-color --root --patch-with-stat --find-copies-harder -C %s 2>/dev/null"
-@@ -369,6 +376,7 @@ sq_quote(char buf[SIZEOF_STR], size_t bufsize, const char *src)
- 	REQ_(TOGGLE_REFS,	"Toggle reference display (tags/branches)"), \
- 	REQ_(STATUS_UPDATE,	"Update file status"), \
- 	REQ_(STATUS_MERGE,	"Merge file using external tool"), \
-+	REQ_(STAGE_NEXT,	"Find next chunk to stage"), \
- 	REQ_(TREE_PARENT,	"Switch to parent directory in tree view"), \
- 	REQ_(EDIT,		"Open in editor"), \
- 	REQ_(NONE,		"Do nothing")
-@@ -438,11 +446,12 @@ static const char usage[] =
- static bool opt_date			= TRUE;
- static bool opt_author			= TRUE;
- static bool opt_line_number		= FALSE;
-+static bool opt_line_graphics		= TRUE;
- static bool opt_rev_graph		= FALSE;
- static bool opt_show_refs		= TRUE;
- static int opt_num_interval		= NUMBER_INTERVAL;
--static int opt_tab_size			= TABSIZE;
--static enum request opt_request		= REQ_VIEW_MAIN;
-+static int opt_tab_size			= TAB_SIZE;
-+static int opt_author_cols		= AUTHOR_COLS-1;
- static char opt_cmd[SIZEOF_STR]		= "";
- static char opt_path[SIZEOF_STR]	= "";
- static char opt_file[SIZEOF_STR]	= "";
-@@ -461,34 +470,32 @@ static char opt_git_dir[SIZEOF_STR]	= "";
+ static struct request_info req_info[] = {
+@@ -480,13 +483,14 @@ static char opt_cdup[SIZEOF_STR]	= "";
+ static char opt_git_dir[SIZEOF_STR]	= "";
  static signed char opt_is_inside_work_tree	= -1; /* set to TRUE or FALSE */
  static char opt_editor[SIZEOF_STR]	= "";
++static FILE *opt_tty			= NULL;
  
--static bool
-+static enum request
- parse_options(int argc, char *argv[])
+ static enum request
+-parse_options(int argc, char *argv[])
++parse_options(int argc, const char *argv[])
  {
-+	enum request request = REQ_VIEW_MAIN;
+ 	enum request request = REQ_VIEW_MAIN;
  	size_t buf_size;
- 	char *subcommand;
+-	char *subcommand;
++	const char *subcommand;
  	bool seen_dashdash = FALSE;
  	int i;
  
- 	if (!isatty(STDIN_FILENO)) {
--		opt_request = REQ_VIEW_PAGER;
- 		opt_pipe = stdin;
--		return TRUE;
-+		return REQ_VIEW_PAGER;
- 	}
+@@ -540,7 +544,7 @@ parse_options(int argc, char *argv[])
+ 	buf_size = strlen(opt_cmd);
  
- 	if (argc <= 1)
--		return TRUE;
-+		return REQ_VIEW_MAIN;
+ 	for (i = 1 + !!subcommand; i < argc; i++) {
+-		char *opt = argv[i];
++		const char *opt = argv[i];
  
- 	subcommand = argv[1];
- 	if (!strcmp(subcommand, "status") || !strcmp(subcommand, "-S")) {
--		opt_request = REQ_VIEW_STATUS;
- 		if (!strcmp(subcommand, "-S"))
- 			warn("`-S' has been deprecated; use `tig status' instead");
- 		if (argc > 2)
- 			warn("ignoring arguments after `%s'", subcommand);
--		return TRUE;
-+		return REQ_VIEW_STATUS;
- 
- 	} else if (!strcmp(subcommand, "blame")) {
--		opt_request = REQ_VIEW_BLAME;
- 		if (argc <= 2 || argc > 4)
- 			die("invalid number of options to blame\n\n%s", usage);
- 
-@@ -499,14 +506,13 @@ parse_options(int argc, char *argv[])
- 		}
- 
- 		string_ncopy(opt_file, argv[i], strlen(argv[i]));
--		return TRUE;
-+		return REQ_VIEW_BLAME;
- 
- 	} else if (!strcmp(subcommand, "show")) {
--		opt_request = REQ_VIEW_DIFF;
-+		request = REQ_VIEW_DIFF;
- 
- 	} else if (!strcmp(subcommand, "log") || !strcmp(subcommand, "diff")) {
--		opt_request = subcommand[0] == 'l'
--			    ? REQ_VIEW_LOG : REQ_VIEW_DIFF;
-+		request = subcommand[0] == 'l' ? REQ_VIEW_LOG : REQ_VIEW_DIFF;
- 		warn("`tig %s' has been deprecated", subcommand);
- 
- 	} else {
-@@ -530,11 +536,11 @@ parse_options(int argc, char *argv[])
- 
- 		} else if (!strcmp(opt, "-v") || !strcmp(opt, "--version")) {
- 			printf("tig version %s\n", TIG_VERSION);
--			return FALSE;
-+			return REQ_NONE;
- 
- 		} else if (!strcmp(opt, "-h") || !strcmp(opt, "--help")) {
- 			printf("%s\n", usage);
--			return FALSE;
-+			return REQ_NONE;
- 		}
- 
- 		opt_cmd[buf_size++] = ' ';
-@@ -545,7 +551,7 @@ parse_options(int argc, char *argv[])
- 
- 	opt_cmd[buf_size] = 0;
- 
--	return TRUE;
-+	return request;
- }
+ 		if (seen_dashdash || !strcmp(opt, "--")) {
+ 			seen_dashdash = TRUE;
+@@ -867,7 +871,7 @@ get_keybinding(enum keymap keymap, int key)
  
  
-@@ -612,7 +618,8 @@ LINE(BLAME_ID,     "",			COLOR_MAGENTA,	COLOR_DEFAULT,	0)
- enum line_type {
- #define LINE(type, line, fg, bg, attr) \
- 	LINE_##type
--	LINE_INFO
-+	LINE_INFO,
-+	LINE_NONE
- #undef	LINE
+ struct key {
+-	char *name;
++	const char *name;
+ 	int value;
  };
  
-@@ -731,7 +738,8 @@ static struct keybinding default_keybindings[] = {
- 	{ KEY_UP,	REQ_PREVIOUS },
- 	{ KEY_DOWN,	REQ_NEXT },
- 	{ 'R',		REQ_REFRESH },
--	{ 'M',		REQ_MAXIMIZE },
-+	{ KEY_F(5),	REQ_REFRESH },
-+	{ 'O',		REQ_MAXIMIZE },
- 
- 	/* Cursor navigation */
- 	{ 'k',		REQ_MOVE_UP },
-@@ -769,6 +777,7 @@ static struct keybinding default_keybindings[] = {
- 	{ ':',		REQ_PROMPT },
- 	{ 'u',		REQ_STATUS_UPDATE },
- 	{ 'M',		REQ_STATUS_MERGE },
-+	{ '@',		REQ_STAGE_NEXT },
- 	{ ',',		REQ_TREE_PARENT },
- 	{ 'e',		REQ_EDIT },
- 
-@@ -954,22 +963,23 @@ static size_t run_requests;
- static enum request
- add_run_request(enum keymap keymap, int key, int argc, char **argv)
- {
--	struct run_request *tmp;
--	struct run_request req = { keymap, key };
-+	struct run_request *req;
-+	char cmd[SIZEOF_STR];
- 	size_t bufpos;
- 
- 	for (bufpos = 0; argc > 0; argc--, argv++)
--		if (!string_format_from(req.cmd, &bufpos, "%s ", *argv))
-+		if (!string_format_from(cmd, &bufpos, "%s ", *argv))
- 			return REQ_NONE;
- 
--	req.cmd[bufpos - 1] = 0;
--
--	tmp = realloc(run_request, (run_requests + 1) * sizeof(*run_request));
--	if (!tmp)
-+	req = realloc(run_request, (run_requests + 1) * sizeof(*run_request));
-+	if (!req)
- 		return REQ_NONE;
- 
--	run_request = tmp;
--	run_request[run_requests++] = req;
-+	run_request = req;
-+	req = &run_request[run_requests++];
-+	string_copy(req->cmd, cmd);
-+	req->keymap = keymap;
-+	req->key = key;
- 
- 	return REQ_NONE + run_requests;
- }
-@@ -1087,6 +1097,14 @@ static bool parse_bool(const char *s)
- 		!strcmp(s, "yes")) ? TRUE : FALSE;
+@@ -917,11 +921,11 @@ get_key_value(const char *name)
+ 	return ERR;
  }
  
-+static int
-+parse_int(const char *s, int default_value, int min, int max)
-+{
-+	int value = atoi(s);
-+
-+	return (value < min || value > max) ? default_value : value;
-+}
-+
- /* Wants: name = value */
- static int
- option_set_command(int argc, char *argv[])
-@@ -1126,13 +1144,23 @@ option_set_command(int argc, char *argv[])
- 		return OK;
- 	}
- 
-+	if (!strcmp(argv[0], "line-graphics")) {
-+		opt_line_graphics = parse_bool(argv[2]);
-+		return OK;
-+	}
-+
- 	if (!strcmp(argv[0], "line-number-interval")) {
--		opt_num_interval = atoi(argv[2]);
-+		opt_num_interval = parse_int(argv[2], opt_num_interval, 1, 1024);
-+		return OK;
-+	}
-+
-+	if (!strcmp(argv[0], "author-width")) {
-+		opt_author_cols = parse_int(argv[2], opt_author_cols, 0, 1024);
- 		return OK;
- 	}
- 
- 	if (!strcmp(argv[0], "tab-size")) {
--		opt_tab_size = atoi(argv[2]);
-+		opt_tab_size = parse_int(argv[2], opt_tab_size, 1, 1024);
- 		return OK;
- 	}
- 
-@@ -1391,6 +1419,11 @@ struct view {
- 	size_t line_size;	/* Total number of used lines */
- 	unsigned int digits;	/* Number of digits in the lines member. */
- 
-+	/* Drawing */
-+	struct line *curline;	/* Line currently being drawn. */
-+	enum line_type curtype;	/* Attribute currently used for drawing. */
-+	unsigned long col;	/* Column when drawing. */
-+
- 	/* Loading */
- 	FILE *pipe;
- 	time_t start_time;
-@@ -1404,7 +1437,7 @@ struct view_ops {
- 	/* Read one line; updates view->line. */
- 	bool (*read)(struct view *view, char *data);
- 	/* Draw one line; @lineno must be < view->height. */
--	bool (*draw)(struct view *view, struct line *line, unsigned int lineno, bool selected);
-+	bool (*draw)(struct view *view, struct line *line, unsigned int lineno);
- 	/* Depending on view handle a special requests. */
- 	enum request (*request)(struct view *view, enum request request, struct line *line);
- 	/* Search for regex in a line. */
-@@ -1451,107 +1484,175 @@ static struct view views[] = {
- #define view_is_displayed(view) \
- 	(view == display[0] || view == display[1])
- 
-+
-+enum line_graphic {
-+	LINE_GRAPHIC_VLINE
-+};
-+
-+static int line_graphics[] = {
-+	/* LINE_GRAPHIC_VLINE: */ '|'
-+};
-+
-+static inline void
-+set_view_attr(struct view *view, enum line_type type)
-+{
-+	if (!view->curline->selected && view->curtype != type) {
-+		wattrset(view->win, get_line_attr(type));
-+		wchgat(view->win, -1, 0, type, NULL);
-+		view->curtype = type;
-+	}
-+}
-+
- static int
--draw_text(struct view *view, const char *string, int max_len,
--	  bool use_tilde, bool selected)
-+draw_chars(struct view *view, enum line_type type, const char *string,
-+	   int max_len, bool use_tilde)
+-static char *
++static const char *
+ get_key_name(int key_value)
  {
- 	int len = 0;
-+	int col = 0;
- 	int trimmed = FALSE;
+ 	static char key_char[] = "'X'";
+-	char *seq = NULL;
++	const char *seq = NULL;
+ 	int key;
  
- 	if (max_len <= 0)
- 		return 0;
+ 	for (key = 0; key < ARRAY_SIZE(key_table); key++)
+@@ -938,7 +942,7 @@ get_key_name(int key_value)
+ 	return seq ? seq : "(no key)";
+ }
  
- 	if (opt_utf8) {
--		len = utf8_length(string, max_len, &trimmed, use_tilde);
-+		len = utf8_length(string, &col, max_len, &trimmed, use_tilde);
- 	} else {
--		len = strlen(string);
-+		col = len = strlen(string);
- 		if (len > max_len) {
- 			if (use_tilde) {
- 				max_len -= 1;
- 			}
--			len = max_len;
-+			col = len = max_len;
- 			trimmed = TRUE;
+-static char *
++static const char *
+ get_key(enum request request)
+ {
+ 	static char buf[BUFSIZ];
+@@ -1062,7 +1066,7 @@ static struct int_map attr_map[] = {
+ 
+ static int   config_lineno;
+ static bool  config_errors;
+-static char *config_msg;
++static const char *config_msg;
+ 
+ /* Wants: object fgcolor bgcolor [attr] */
+ static int
+@@ -1249,7 +1253,7 @@ option_bind_command(int argc, const char *argv[])
+ }
+ 
+ static int
+-set_option(char *opt, char *value)
++set_option(const char *opt, char *value)
+ {
+ 	const char *argv[SIZEOF_ARG];
+ 	int valuelen;
+@@ -1343,9 +1347,9 @@ load_option_file(const char *path)
+ static int
+ load_options(void)
+ {
+-	char *home = getenv("HOME");
+-	char *tigrc_user = getenv("TIGRC_USER");
+-	char *tigrc_system = getenv("TIGRC_SYSTEM");
++	const char *home = getenv("HOME");
++	const char *tigrc_user = getenv("TIGRC_USER");
++	const char *tigrc_system = getenv("TIGRC_SYSTEM");
+ 	char buf[SIZEOF_STR];
+ 
+ 	add_builtin_run_requests();
+@@ -1639,7 +1643,7 @@ draw_graphic(struct view *view, enum line_type type, chtype graphic[], size_t si
+ }
+ 
+ static bool
+-draw_field(struct view *view, enum line_type type, char *text, int len, bool trim)
++draw_field(struct view *view, enum line_type type, const char *text, int len, bool trim)
+ {
+ 	int max = MIN(view->width - view->col, len);
+ 	int col;
+@@ -2375,8 +2379,14 @@ update_view(struct view *view)
  		}
  	}
  
-+	set_view_attr(view, type);
- 	waddnstr(view->win, string, len);
- 	if (trimmed && use_tilde) {
--		if (!selected)
--			wattrset(view->win, get_line_attr(LINE_DELIMITER));
-+		set_view_attr(view, LINE_DELIMITER);
- 		waddch(view->win, '~');
--		len++;
-+		col++;
- 	}
- 
--	return len;
-+	return col;
- }
- 
- static int
--draw_lineno(struct view *view, unsigned int lineno, int max, bool selected)
-+draw_space(struct view *view, enum line_type type, int max, int spaces)
-+{
-+	static char space[] = "                    ";
-+	int col = 0;
-+
-+	spaces = MIN(max, spaces);
-+
-+	while (spaces > 0) {
-+		int len = MIN(spaces, sizeof(space) - 1);
-+
-+		col += draw_chars(view, type, space, spaces, FALSE);
-+		spaces -= len;
-+	}
-+
-+	return col;
-+}
-+
-+static bool
-+draw_lineno(struct view *view, unsigned int lineno)
- {
--	static char fmt[] = "%1ld";
--	char number[10] = "          ";
-+	char number[10];
- 	int digits3 = view->digits < 3 ? 3 : view->digits;
- 	int max_number = MIN(digits3, STRING_SIZE(number));
--	bool showtrimmed = FALSE;
-+	int max = view->width - view->col;
- 	int col;
- 
-+	if (max < max_number)
-+		max_number = max;
-+
- 	lineno += view->offset + 1;
- 	if (lineno == 1 || (lineno % opt_num_interval) == 0) {
-+		static char fmt[] = "%1ld";
-+
- 		if (view->digits <= 9)
- 			fmt[1] = '0' + digits3;
- 
- 		if (!string_format(number, fmt, lineno))
- 			number[0] = 0;
--		showtrimmed = TRUE;
-+		col = draw_chars(view, LINE_LINE_NUMBER, number, max_number, TRUE);
-+	} else {
-+		col = draw_space(view, LINE_LINE_NUMBER, max_number, max_number);
- 	}
- 
--	if (max < max_number)
--		max_number = max;
--
--	if (!selected)
--		wattrset(view->win, get_line_attr(LINE_LINE_NUMBER));
--	col = draw_text(view, number, max_number, showtrimmed, selected);
- 	if (col < max) {
--		if (!selected)
--			wattrset(view->win, A_NORMAL);
--		waddch(view->win, ACS_VLINE);
-+		set_view_attr(view, LINE_DEFAULT);
-+		waddch(view->win, line_graphics[LINE_GRAPHIC_VLINE]);
- 		col++;
- 	}
--	if (col < max) {
-+
-+	if (col < max)
-+		col += draw_space(view, LINE_DEFAULT, max - col, 1);
-+	view->col += col;
-+
-+	return view->width - view->col <= 0;
-+}
-+
-+static bool
-+draw_text(struct view *view, enum line_type type, const char *string, bool trim)
-+{
-+	view->col += draw_chars(view, type, string, view->width - view->col, trim);
-+	return view->width - view->col <= 0;
-+}
-+
-+static bool
-+draw_graphic(struct view *view, enum line_type type, chtype graphic[], size_t size)
-+{
-+	int max = view->width - view->col;
-+	int i;
-+
-+	if (max < size)
-+		size = max;
-+
-+	set_view_attr(view, type);
-+	/* Using waddch() instead of waddnstr() ensures that
-+	 * they'll be rendered correctly for the cursor line. */
-+	for (i = 0; i < size; i++)
-+		waddch(view->win, graphic[i]);
-+
-+	view->col += size;
-+	if (size < max) {
- 		waddch(view->win, ' ');
--		col++;
-+		view->col++;
- 	}
- 
--	return col;
-+	return view->width - view->col <= 0;
- }
- 
--static int
--draw_date(struct view *view, struct tm *time, int max, bool selected)
-+static bool
-+draw_field(struct view *view, enum line_type type, char *text, int len, bool trim)
- {
--	char buf[DATE_COLS];
-+	int max = MIN(view->width - view->col, len);
- 	int col;
-+
-+	if (text)
-+		col = draw_chars(view, type, text, max - 1, trim);
-+	else
-+		col = draw_space(view, type, max - 1, max - 1);
-+
-+	view->col += col + draw_space(view, LINE_DEFAULT, max - col, max - col);
-+	return view->width - view->col <= 0;
-+}
-+
-+static bool
-+draw_date(struct view *view, struct tm *time)
-+{
-+	char buf[DATE_COLS];
-+	char *date;
- 	int timelen = 0;
- 
--	if (max > DATE_COLS)
--		max = DATE_COLS;
- 	if (time)
- 		timelen = strftime(buf, sizeof(buf), DATE_FORMAT, time);
--	if (!timelen) {
--		memset(buf, ' ', sizeof(buf) - 1);
--		buf[sizeof(buf) - 1] = 0;
--	}
-+	date = timelen ? buf : NULL;
- 
--	if (!selected)
--		wattrset(view->win, get_line_attr(LINE_DATE));
--	col = draw_text(view, buf, max, FALSE, selected);
--	if (col < max) {
--		if (!selected)
--			wattrset(view->win, get_line_attr(LINE_DEFAULT));
--		waddch(view->win, ' ');
--		col++;
--	}
--
--	return col;
-+	return draw_field(view, LINE_DATE, date, DATE_COLS, FALSE);
- }
- 
- static bool
-@@ -1569,19 +1670,21 @@ draw_view_line(struct view *view, unsigned int lineno)
- 	line = &view->line[view->offset + lineno];
- 
- 	wmove(view->win, lineno, 0);
-+	view->col = 0;
-+	view->curline = line;
-+	view->curtype = LINE_NONE;
-+	line->selected = FALSE;
- 
- 	if (selected) {
-+		set_view_attr(view, LINE_CURSOR);
- 		line->selected = TRUE;
- 		view->ops->select(view, line);
--		wchgat(view->win, -1, 0, LINE_CURSOR, NULL);
--		wattrset(view->win, get_line_attr(LINE_CURSOR));
- 	} else if (line->selected) {
--		line->selected = FALSE;
- 		wclrtoeol(view->win);
- 	}
- 
- 	scrollok(view->win, FALSE);
--	draw_ok = view->ops->draw(view, line, lineno, selected);
-+	draw_ok = view->ops->draw(view, line, lineno);
- 	scrollok(view->win, TRUE);
- 
- 	return draw_ok;
-@@ -2070,10 +2173,13 @@ search_view(struct view *view, enum request request)
-  */
- 
- static void
--end_update(struct view *view)
-+end_update(struct view *view, bool force)
- {
- 	if (!view->pipe)
- 		return;
-+	while (!view->ops->read(view, NULL))
-+		if (!force)
-+			return;
- 	set_nonblocking_input(FALSE);
- 	if (view->pipe == stdin)
- 		fclose(view->pipe);
-@@ -2085,9 +2191,6 @@ end_update(struct view *view)
- static bool
- begin_update(struct view *view)
- {
--	if (view->pipe)
--		end_update(view);
--
- 	if (opt_cmd[0]) {
- 		string_copy(view->cmd, opt_cmd);
- 		opt_cmd[0] = 0;
-@@ -2289,23 +2392,20 @@ update_view(struct view *view)
- 	update_view_title(view);
- 
- check_pipe:
--	if (ferror(view->pipe)) {
+-	if (!view_is_displayed(view))
+-		goto check_pipe;
 +	if (ferror(view->pipe) && errno != 0) {
- 		report("Failed to read: %s", strerror(errno));
--		goto end;
++		report("Failed to read: %s", strerror(errno));
 +		end_update(view, TRUE);
- 
- 	} else if (feof(view->pipe)) {
- 		report("");
--		goto end;
++
++	} else if (feof(view->pipe)) {
++		report("");
 +		end_update(view, FALSE);
- 	}
++	}
  
+ 	if (view == VIEW(REQ_VIEW_TREE)) {
+ 		/* Clear the view and redraw everything since the tree sorting
+@@ -2406,17 +2416,6 @@ update_view(struct view *view)
+ 	/* Update the title _after_ the redraw so that if the redraw picks up a
+ 	 * commit reference in view->ref it'll be available here. */
+ 	update_view_title(view);
+-
+-check_pipe:
+-	if (ferror(view->pipe) && errno != 0) {
+-		report("Failed to read: %s", strerror(errno));
+-		end_update(view, TRUE);
+-
+-	} else if (feof(view->pipe)) {
+-		report("");
+-		end_update(view, FALSE);
+-	}
+-
  	return TRUE;
  
  alloc_error:
- 	report("Allocation failure");
--
--end:
--	if (view->ops->read(view, NULL))
--		end_update(view);
-+	end_update(view, TRUE);
- 	return FALSE;
+@@ -2438,10 +2437,9 @@ add_line_data(struct view *view, void *data, enum line_type type)
  }
  
-@@ -2340,7 +2440,7 @@ enum open_flags {
- 	OPEN_SPLIT = 1,		/* Split current view. */
- 	OPEN_BACKGROUNDED = 2,	/* Backgrounded. */
- 	OPEN_RELOAD = 4,	/* Reload view even if it is the current. */
--	OPEN_NOMAXIMIZE = 8,	/* Do not maximize the current view. */
-+	OPEN_NOMAXIMIZE = 8	/* Do not maximize the current view. */
- };
+ static struct line *
+-add_line_text(struct view *view, char *data, enum line_type type)
++add_line_text(struct view *view, const char *text, enum line_type type)
+ {
+-	if (data)
+-		data = strdup(data);
++	char *data = text ? strdup(text) : NULL;
+ 
+ 	return data ? add_line_data(view, data, type) : NULL;
+ }
+@@ -2565,7 +2563,7 @@ open_external_viewer(const char *cmd)
+ 	endwin();                  /* restore original tty modes */
+ 	system(cmd);
+ 	fprintf(stderr, "Press Enter to continue");
+-	getc(stdin);
++	getc(opt_tty);
+ 	reset_prog_mode();
+ 	redraw_display();
+ }
+@@ -2587,7 +2585,7 @@ open_editor(bool from_root, const char *file)
+ {
+ 	char cmd[SIZEOF_STR];
+ 	char file_sq[SIZEOF_STR];
+-	char *editor;
++	const char *editor;
+ 	char *prefix = from_root ? opt_cdup : "";
+ 
+ 	editor = getenv("GIT_EDITOR");
+@@ -2893,7 +2891,6 @@ view_driver(struct view *view, enum request request)
+ 		return FALSE;
+ 
+ 	default:
+-		/* An unknown key will show most commonly used commands. */
+ 		report("Unknown key, press 'h' for help");
+ 		return TRUE;
+ 	}
+@@ -2919,7 +2916,7 @@ pager_draw(struct view *view, struct line *line, unsigned int lineno)
+ }
+ 
+ static bool
+-add_describe_ref(char *buf, size_t *bufpos, char *commit_id, const char *sep)
++add_describe_ref(char *buf, size_t *bufpos, const char *commit_id, const char *sep)
+ {
+ 	char refbuf[SIZEOF_STR];
+ 	char *ref = NULL;
+@@ -2967,8 +2964,8 @@ add_pager_refs(struct view *view, struct line *line)
+ 
+ 	do {
+ 		struct ref *ref = refs[refpos];
+-		char *fmt = ref->tag    ? "%s[%s]" :
+-		            ref->remote ? "%s<%s>" : "%s%s";
++		const char *fmt = ref->tag    ? "%s[%s]" :
++		                  ref->remote ? "%s<%s>" : "%s%s";
+ 
+ 		if (!string_format_from(buf, &bufpos, fmt, sep, ref->name))
+ 			return;
+@@ -3130,7 +3127,7 @@ help_open(struct view *view)
+ 	add_line_text(view, "Quick reference for tig keybindings:", LINE_DEFAULT);
+ 
+ 	for (i = 0; i < ARRAY_SIZE(req_info); i++) {
+-		char *key;
++		const char *key;
+ 
+ 		if (req_info[i].request == REQ_NONE)
+ 			continue;
+@@ -3158,7 +3155,7 @@ help_open(struct view *view)
+ 
+ 	for (i = 0; i < run_requests; i++) {
+ 		struct run_request *req = get_run_request(REQ_NONE + i + 1);
+-		char *key;
++		const char *key;
+ 
+ 		if (!req)
+ 			continue;
+@@ -3215,7 +3212,7 @@ pop_tree_stack_entry(void)
+ }
  
  static void
-@@ -2381,6 +2481,9 @@ open_view(struct view *prev, enum request request, enum open_flags flags)
- 	    (nviews == 1 && base_view != display[0]))
- 		resize_display();
- 
-+	if (view->pipe)
-+		end_update(view, TRUE);
-+
- 	if (view->ops->open) {
- 		if (!view->ops->open(view)) {
- 			report("Failed to load %s view", view->name);
-@@ -2702,11 +2805,6 @@ view_driver(struct view *view, enum request request)
- 		redraw_display();
- 		break;
- 
--	case REQ_PROMPT:
--		/* Always reload^Wrerun commands from the prompt. */
--		open_view(view, opt_request, OPEN_RELOAD);
--		break;
--
- 	case REQ_SEARCH:
- 	case REQ_SEARCH_BACK:
- 		search_view(view, request);
-@@ -2722,7 +2820,7 @@ view_driver(struct view *view, enum request request)
- 			view = &views[i];
- 			if (view->pipe)
- 				report("Stopped loading the %s view", view->name),
--			end_update(view);
-+			end_update(view, TRUE);
- 		}
- 		break;
- 
-@@ -2741,12 +2839,10 @@ view_driver(struct view *view, enum request request)
- 		report("Nothing to edit");
- 		break;
- 
--
- 	case REQ_ENTER:
- 		report("Nothing to enter");
- 		break;
- 
--
- 	case REQ_VIEW_CLOSE:
- 		/* XXX: Mark closed views by letting view->parent point to the
- 		 * view itself. Parents to closed view should never be
-@@ -2780,49 +2876,14 @@ view_driver(struct view *view, enum request request)
-  */
- 
- static bool
--pager_draw(struct view *view, struct line *line, unsigned int lineno, bool selected)
-+pager_draw(struct view *view, struct line *line, unsigned int lineno)
+-push_tree_stack_entry(char *name, unsigned long lineno)
++push_tree_stack_entry(const char *name, unsigned long lineno)
  {
--	static char spaces[] = "                    ";
- 	char *text = line->data;
--	int col = 0;
--
--	if (opt_line_number) {
--		col += draw_lineno(view, lineno, view->width, selected);
--		if (col >= view->width)
--			return TRUE;
--	}
--
--	if (!selected)
--		wattrset(view->win, get_line_attr(line->type));
--
--	if (opt_tab_size < TABSIZE) {
--		int col_offset = col;
--
--		col = 0;
--		while (text && col_offset + col < view->width) {
--			int cols_max = view->width - col_offset - col;
--			char *pos = text;
--			int cols;
+ 	struct tree_stack_entry *entry = calloc(1, sizeof(*entry));
+ 	size_t pathlen = strlen(opt_path);
+@@ -3251,8 +3248,8 @@ push_tree_stack_entry(char *name, unsigned long lineno)
+ #define TREE_UP_FORMAT "040000 tree %s\t.."
  
--			if (*text == '\t') {
--				text++;
--				assert(sizeof(spaces) > TABSIZE);
--				pos = spaces;
--				cols = opt_tab_size - (col % opt_tab_size);
--
--			} else {
--				text = strchr(text, '\t');
--				cols = line ? text - pos : strlen(pos);
--			}
--
--			waddnstr(view->win, pos, MIN(cols, cols_max));
--			col += cols;
--		}
--
--	} else {
--		draw_text(view, text, view->width - col, TRUE, selected);
--	}
-+	if (opt_line_number && draw_lineno(view, lineno))
-+		return TRUE;
- 
-+	draw_text(view, line->type, text, TRUE);
- 	return TRUE;
+ static int
+-tree_compare_entry(enum line_type type1, char *name1,
+-		   enum line_type type2, char *name2)
++tree_compare_entry(enum line_type type1, const char *name1,
++		   enum line_type type2, const char *name2)
+ {
+ 	if (type1 != type2) {
+ 		if (type1 == LINE_TREE_DIR)
+@@ -3263,10 +3260,10 @@ tree_compare_entry(enum line_type type1, char *name1,
+ 	return strcmp(name1, name2);
  }
  
-@@ -3525,9 +3586,6 @@ blame_read_file(struct view *view, char *line)
- 		size_t linelen = strlen(line);
- 		struct blame *blame = malloc(sizeof(*blame) + linelen);
+-static char *
++static const char *
+ tree_path(struct line *line)
+ {
+-	char *path = line->data;
++	const char *path = line->data;
  
--		if (!line)
--			return FALSE;
--
- 		blame->commit = NULL;
- 		strncpy(blame->text, line, linelen);
- 		blame->text[linelen] = 0;
-@@ -3606,51 +3664,32 @@ blame_read(struct view *view, char *line)
+ 	return path + SIZEOF_TREE_ATTR;
+ }
+@@ -3318,7 +3315,7 @@ tree_read(struct view *view, char *text)
+ 	/* Skip "Directory ..." and ".." line. */
+ 	for (pos = 1 + !!*opt_path; pos < view->lines; pos++) {
+ 		struct line *line = &view->line[pos];
+-		char *path1 = tree_path(line);
++		const char *path1 = tree_path(line);
+ 		char *path2 = text + SIZEOF_TREE_ATTR;
+ 		int cmp = tree_compare_entry(line->type, path1, type, path2);
+ 
+@@ -3357,7 +3354,7 @@ tree_request(struct view *view, enum request request, struct line *line)
+ 	enum open_flags flags;
+ 
+ 	if (request == REQ_VIEW_BLAME) {
+-		char *filename = tree_path(line);
++		const char *filename = tree_path(line);
+ 
+ 		if (line->type == LINE_TREE_DIR) {
+ 			report("Cannot show blame for directory %s", opt_path);
+@@ -3393,7 +3390,7 @@ tree_request(struct view *view, enum request request, struct line *line)
+ 			pop_tree_stack_entry();
+ 
+ 		} else {
+-			char *basename = tree_path(line);
++			const char *basename = tree_path(line);
+ 
+ 			push_tree_stack_entry(basename, view->lineno);
+ 		}
+@@ -3490,7 +3487,7 @@ struct blame {
+ };
+ 
+ #define BLAME_CAT_FILE_CMD "git cat-file blob %s:%s"
+-#define BLAME_INCREMENTAL_CMD "git blame --incremental %s %s"
++#define BLAME_INCREMENTAL_CMD "git blame --incremental %s -- %s"
+ 
+ static bool
+ blame_open(struct view *view)
+@@ -3556,9 +3553,9 @@ get_blame_commit(struct view *view, const char *id)
  }
  
  static bool
--blame_draw(struct view *view, struct line *line, unsigned int lineno, bool selected)
-+blame_draw(struct view *view, struct line *line, unsigned int lineno)
+-parse_number(char **posref, size_t *number, size_t min, size_t max)
++parse_number(const char **posref, size_t *number, size_t min, size_t max)
+ {
+-	char *pos = *posref;
++	const char *pos = *posref;
+ 
+ 	*posref = NULL;
+ 	pos = strchr(pos + 1, ' ');
+@@ -3573,11 +3570,11 @@ parse_number(char **posref, size_t *number, size_t min, size_t max)
+ }
+ 
+ static struct blame_commit *
+-parse_blame_commit(struct view *view, char *text, int *blamed)
++parse_blame_commit(struct view *view, const char *text, int *blamed)
+ {
+ 	struct blame_commit *commit;
+ 	struct blame *blame;
+-	char *pos = text + SIZEOF_REV - 1;
++	const char *pos = text + SIZEOF_REV - 1;
+ 	size_t lineno;
+ 	size_t group;
+ 
+@@ -3606,7 +3603,7 @@ parse_blame_commit(struct view *view, char *text, int *blamed)
+ }
+ 
+ static bool
+-blame_read_file(struct view *view, char *line)
++blame_read_file(struct view *view, const char *line)
+ {
+ 	if (!line) {
+ 		FILE *pipe = NULL;
+@@ -3711,7 +3708,7 @@ blame_draw(struct view *view, struct line *line, unsigned int lineno)
  {
  	struct blame *blame = line->data;
--	int col = 0;
--
--	if (opt_date) {
--		struct tm *time = blame->commit && *blame->commit->filename
--				? &blame->commit->time : NULL;
-+	struct tm *time = NULL;
-+	char *id = NULL, *author = NULL;
+ 	struct tm *time = NULL;
+-	char *id = NULL, *author = NULL;
++	const char *id = NULL, *author = NULL;
  
--		col += draw_date(view, time, view->width, selected);
--		if (col >= view->width)
--			return TRUE;
-+	if (blame->commit && *blame->commit->filename) {
-+		id = blame->commit->id;
-+		author = blame->commit->author;
-+		time = &blame->commit->time;
- 	}
- 
--	if (opt_author) {
--		int max = MIN(AUTHOR_COLS - 1, view->width - col);
-+	if (opt_date && draw_date(view, time))
-+		return TRUE;
- 
--		if (!selected)
--			wattrset(view->win, get_line_attr(LINE_MAIN_AUTHOR));
--		if (blame->commit)
--			draw_text(view, blame->commit->author, max, TRUE, selected);
--		col += AUTHOR_COLS;
--		if (col >= view->width)
--			return TRUE;
--		wmove(view->win, lineno, col);
--	}
-+	if (opt_author &&
-+	    draw_field(view, LINE_MAIN_AUTHOR, author, opt_author_cols, TRUE))
-+		return TRUE;
- 
--	{
--		int max = MIN(ID_COLS - 1, view->width - col);
--
--		if (!selected)
--			wattrset(view->win, get_line_attr(LINE_BLAME_ID));
--		if (blame->commit)
--			draw_text(view, blame->commit->id, max, FALSE, -1);
--		col += ID_COLS;
--		if (col >= view->width)
--			return TRUE;
--		wmove(view->win, lineno, col);
--	}
-+	if (draw_field(view, LINE_BLAME_ID, id, ID_COLS, FALSE))
-+		return TRUE;
- 
--	col += draw_lineno(view, lineno, view->width - col, selected);
--	if (col >= view->width)
-+	if (draw_lineno(view, lineno))
- 		return TRUE;
- 
--	col += draw_text(view, blame->text, view->width - col, TRUE, selected);
-+	draw_text(view, LINE_DEFAULT, blame->text, TRUE);
- 	return TRUE;
- }
- 
-@@ -3692,23 +3731,23 @@ blame_grep(struct view *view, struct line *line)
- 	struct blame_commit *commit = blame->commit;
- 	regmatch_t pmatch;
- 
--#define MATCH(text) \
--	(*text && regexec(view->regex, text, 1, &pmatch, 0) != REG_NOMATCH)
-+#define MATCH(text, on)							\
-+	(on && *text && regexec(view->regex, text, 1, &pmatch, 0) != REG_NOMATCH)
- 
- 	if (commit) {
- 		char buf[DATE_COLS + 1];
- 
--		if (MATCH(commit->title) ||
--		    MATCH(commit->author) ||
--		    MATCH(commit->id))
-+		if (MATCH(commit->title, 1) ||
-+		    MATCH(commit->author, opt_author) ||
-+		    MATCH(commit->id, opt_date))
- 			return TRUE;
- 
- 		if (strftime(buf, sizeof(buf), DATE_FORMAT, &commit->time) &&
--		    MATCH(buf))
-+		    MATCH(buf, 1))
- 			return TRUE;
- 	}
- 
--	return MATCH(blame->text);
-+	return MATCH(blame->text, 1);
- 
- #undef MATCH
- }
-@@ -3759,6 +3798,8 @@ struct status {
- static char status_onbranch[SIZEOF_STR];
- static struct status stage_status;
- static enum line_type stage_line_type;
-+static size_t stage_chunks;
-+static int *stage_chunk;
- 
- /* Get fields from the diff line:
+ 	if (blame->commit && *blame->commit->filename) {
+ 		id = blame->commit->id;
+@@ -3855,13 +3852,13 @@ status_has_none(struct view *view, struct line *line)
   * :100644 100644 06a5d6ae9eca55be2e0e585a152e6b1336f2b20e 0000000000000000000000000000000000000000 M
-@@ -3977,7 +4018,7 @@ status_open(struct view *view)
- 			return FALSE;
- 	}
+  */
+ static inline bool
+-status_get_diff(struct status *file, char *buf, size_t bufsize)
++status_get_diff(struct status *file, const char *buf, size_t bufsize)
+ {
+-	char *old_mode = buf +  1;
+-	char *new_mode = buf +  8;
+-	char *old_rev  = buf + 15;
+-	char *new_rev  = buf + 56;
+-	char *status   = buf + 97;
++	const char *old_mode = buf +  1;
++	const char *new_mode = buf +  8;
++	const char *old_rev  = buf + 15;
++	const char *new_rev  = buf + 56;
++	const char *status   = buf + 97;
  
--	system("git update-index -q --refresh 2>/dev/null");
-+	system("git update-index -q --refresh >/dev/null 2>/dev/null");
- 
- 	if (!status_run(view, indexcmd, indexstatus, LINE_STAT_STAGED) ||
- 	    !status_run(view, STATUS_DIFF_FILES_CMD, 0, LINE_STAT_UNSTAGED) ||
-@@ -4009,46 +4050,36 @@ status_open(struct view *view)
- }
- 
- static bool
--status_draw(struct view *view, struct line *line, unsigned int lineno, bool selected)
-+status_draw(struct view *view, struct line *line, unsigned int lineno)
+ 	if (bufsize < 99 ||
+ 	    old_mode[-1] != ':' ||
+@@ -4078,7 +4075,7 @@ status_draw(struct view *view, struct line *line, unsigned int lineno)
  {
  	struct status *status = line->data;
-+	enum line_type type;
- 	char *text;
--	int col = 0;
--
--	if (selected) {
--		/* No attributes. */
--
--	} else if (line->type == LINE_STAT_HEAD) {
--		wattrset(view->win, get_line_attr(LINE_STAT_HEAD));
--		wchgat(view->win, -1, 0, LINE_STAT_HEAD, NULL);
--
--	} else if (!status && line->type != LINE_STAT_NONE) {
--		wattrset(view->win, get_line_attr(LINE_STAT_SECTION));
--		wchgat(view->win, -1, 0, LINE_STAT_SECTION, NULL);
--
--	} else {
--		wattrset(view->win, get_line_attr(line->type));
--	}
+ 	enum line_type type;
+-	char *text;
++	const char *text;
  
  	if (!status) {
  		switch (line->type) {
- 		case LINE_STAT_STAGED:
-+			type = LINE_STAT_SECTION;
- 			text = "Changes to be committed:";
- 			break;
+@@ -4130,7 +4127,7 @@ status_enter(struct view *view, struct line *line)
+ 	struct status *status = line->data;
+ 	char oldpath[SIZEOF_STR] = "";
+ 	char newpath[SIZEOF_STR] = "";
+-	char *info;
++	const char *info;
+ 	size_t cmdsize = 0;
+ 	enum open_flags split;
  
- 		case LINE_STAT_UNSTAGED:
-+			type = LINE_STAT_SECTION;
- 			text = "Changed but not updated:";
- 			break;
+@@ -4393,7 +4390,7 @@ status_revert(struct status *status, enum line_type type, bool has_none)
+ 		char file_sq[SIZEOF_STR];
  
- 		case LINE_STAT_UNTRACKED:
-+			type = LINE_STAT_SECTION;
- 			text = "Untracked files:";
- 			break;
- 
- 		case LINE_STAT_NONE:
-+			type = LINE_DEFAULT;
- 			text = "    (no files)";
- 			break;
- 
- 		case LINE_STAT_HEAD:
-+			type = LINE_STAT_HEAD;
- 			text = status_onbranch;
- 			break;
- 
-@@ -4056,15 +4087,16 @@ status_draw(struct view *view, struct line *line, unsigned int lineno, bool sele
+ 		if (sq_quote(file_sq, 0, status->old.name) >= sizeof(file_sq) ||
+-		    !string_format(cmd, "git checkout %s%s", opt_cdup, file_sq))
++		    !string_format(cmd, "git checkout -- %s%s", opt_cdup, file_sq))
  			return FALSE;
- 		}
- 	} else {
--		char buf[] = { status->status, ' ', ' ', ' ', 0 };
-+		static char buf[] = { '?', ' ', ' ', ' ', 0 };
  
--		col += draw_text(view, buf, view->width, TRUE, selected);
--		if (!selected)
--			wattrset(view->win, A_NORMAL);
-+		buf[0] = status->status;
-+		if (draw_text(view, line->type, buf, TRUE))
-+			return TRUE;
-+		type = LINE_DEFAULT;
- 		text = status->new.name;
- 	}
- 
--	draw_text(view, text, view->width - col, TRUE, selected);
-+	draw_text(view, type, text, TRUE);
- 	return TRUE;
- }
- 
-@@ -4159,6 +4191,7 @@ status_enter(struct view *view, struct line *line)
- 		}
- 
- 		stage_line_type = line->type;
-+		stage_chunks = 0;
- 		string_format(VIEW(REQ_VIEW_STAGE)->ref, info, stage_status.new.name);
- 	}
- 
-@@ -4303,11 +4336,14 @@ status_update(struct view *view)
- 			return FALSE;
- 		}
- 
--		if (!status_update_files(view, line + 1))
-+		if (!status_update_files(view, line + 1)) {
- 			report("Failed to update file status");
-+			return FALSE;
-+		}
- 
- 	} else if (!status_update_file(line->data, line->type)) {
- 		report("Failed to update file status");
-+		return FALSE;
- 	}
- 
- 	return TRUE;
-@@ -4545,6 +4581,18 @@ stage_update(struct view *view, struct line *line)
- 			return FALSE;
- 		}
- 
-+	} else if (!stage_status.status) {
-+		view = VIEW(REQ_VIEW_STATUS);
-+
-+		for (line = view->line; line < view->line + view->lines; line++)
-+			if (line->type == stage_line_type)
-+				break;
-+
-+		if (!status_update_files(view, line + 1)) {
-+			report("Failed to update files");
-+			return FALSE;
-+		}
-+
- 	} else if (!status_update_file(&stage_status, stage_line_type)) {
- 		report("Failed to update file");
- 		return FALSE;
-@@ -4553,14 +4601,60 @@ stage_update(struct view *view, struct line *line)
- 	return TRUE;
- }
- 
-+static void
-+stage_next(struct view *view, struct line *line)
-+{
-+	int i;
-+
-+	if (!stage_chunks) {
-+		static size_t alloc = 0;
-+		int *tmp;
-+
-+		for (line = view->line; line < view->line + view->lines; line++) {
-+			if (line->type != LINE_DIFF_CHUNK)
-+				continue;
-+
-+			tmp = realloc_items(stage_chunk, &alloc,
-+					    stage_chunks, sizeof(*tmp));
-+			if (!tmp) {
-+				report("Allocation failure");
-+				return;
-+			}
-+
-+			stage_chunk = tmp;
-+			stage_chunk[stage_chunks++] = line - view->line;
-+		}
-+	}
-+
-+	for (i = 0; i < stage_chunks; i++) {
-+		if (stage_chunk[i] > view->lineno) {
-+			do_scroll_view(view, stage_chunk[i] - view->lineno);
-+			report("Chunk %d of %d", i + 1, stage_chunks);
-+			return;
-+		}
-+	}
-+
-+	report("No next chunk found");
-+}
-+
- static enum request
- stage_request(struct view *view, enum request request, struct line *line)
+ 		return run_confirm(cmd, "Are you sure you want to overwrite any changes?");
+@@ -4463,8 +4460,8 @@ status_select(struct view *view, struct line *line)
  {
- 	switch (request) {
- 	case REQ_STATUS_UPDATE:
--		stage_update(view, line);
-+		if (!stage_update(view, line))
-+			return REQ_NONE;
- 		break;
+ 	struct status *status = line->data;
+ 	char file[SIZEOF_STR] = "all files";
+-	char *text;
+-	char *key;
++	const char *text;
++	const char *key;
  
-+	case REQ_STAGE_NEXT:
-+		if (stage_line_type == LINE_STAT_UNTRACKED) {
-+			report("File is untracked; press %s to add",
-+			       get_key(REQ_STATUS_UPDATE));
-+			return REQ_NONE;
-+		}
-+		stage_next(view, line);
-+		return REQ_NONE;
-+
- 	case REQ_EDIT:
- 		if (!stage_status.new.name[0])
- 			return request;
-@@ -4732,7 +4826,7 @@ draw_rev_graph(struct rev_graph *graph)
- 	};
- 	enum { DEFAULT, RSHARP, RDIAG, LDIAG };
- 	static struct rev_filler fillers[] = {
--		{ ' ',	REVGRAPH_LINE },
-+		{ ' ',	'|' },
- 		{ '`',	'.' },
- 		{ '\'',	' ' },
- 		{ '/',	' ' },
-@@ -4741,6 +4835,9 @@ draw_rev_graph(struct rev_graph *graph)
- 	struct rev_filler *filler;
- 	size_t i;
- 
-+	if (opt_line_graphics)
-+		fillers[DEFAULT].line = line_graphics[LINE_GRAPHIC_VLINE];
-+
- 	filler = &fillers[DEFAULT];
- 
- 	for (i = 0; i < graph->pos; i++) {
-@@ -4824,100 +4921,54 @@ update_rev_graph(struct rev_graph *graph)
-  */
- 
- static bool
--main_draw(struct view *view, struct line *line, unsigned int lineno, bool selected)
-+main_draw(struct view *view, struct line *line, unsigned int lineno)
- {
- 	struct commit *commit = line->data;
--	enum line_type type;
--	int col = 0;
- 
- 	if (!*commit->author)
+ 	if (status && !string_format(file, "'%s'", status->new.name))
+ 		return;
+@@ -4517,7 +4514,7 @@ status_grep(struct view *view, struct line *line)
  		return FALSE;
  
--	if (selected) {
--		type = LINE_CURSOR;
--	} else {
--		type = LINE_MAIN_COMMIT;
--	}
--
--	if (opt_date) {
--		col += draw_date(view, &commit->time, view->width, selected);
--		if (col >= view->width)
--			return TRUE;
--	}
--	if (type != LINE_CURSOR)
--		wattrset(view->win, get_line_attr(LINE_MAIN_AUTHOR));
--
--	if (opt_author) {
--		int max_len;
--
--		max_len = view->width - col;
--		if (max_len > AUTHOR_COLS - 1)
--			max_len = AUTHOR_COLS - 1;
--		draw_text(view, commit->author, max_len, TRUE, selected);
--		col += AUTHOR_COLS;
--		if (col >= view->width)
--			return TRUE;
--	}
--
--	if (opt_rev_graph && commit->graph_size) {
--		size_t graph_size = view->width - col;
--		size_t i;
--
--		if (type != LINE_CURSOR)
--			wattrset(view->win, get_line_attr(LINE_MAIN_REVGRAPH));
--		wmove(view->win, lineno, col);
--		if (graph_size > commit->graph_size)
--			graph_size = commit->graph_size;
--		/* Using waddch() instead of waddnstr() ensures that
--		 * they'll be rendered correctly for the cursor line. */
--		for (i = 0; i < graph_size; i++)
--			waddch(view->win, commit->graph[i]);
-+	if (opt_date && draw_date(view, &commit->time))
-+		return TRUE;
- 
--		col += commit->graph_size + 1;
--		if (col >= view->width)
--			return TRUE;
--		waddch(view->win, ' ');
--	}
--	if (type != LINE_CURSOR)
--		wattrset(view->win, A_NORMAL);
-+	if (opt_author &&
-+	    draw_field(view, LINE_MAIN_AUTHOR, commit->author, opt_author_cols, TRUE))
-+		return TRUE;
- 
--	wmove(view->win, lineno, col);
-+	if (opt_rev_graph && commit->graph_size &&
-+	    draw_graphic(view, LINE_MAIN_REVGRAPH, commit->graph, commit->graph_size))
-+		return TRUE;
- 
- 	if (opt_show_refs && commit->refs) {
- 		size_t i = 0;
- 
- 		do {
--			if (type == LINE_CURSOR)
--				;
--			else if (commit->refs[i]->head)
--				wattrset(view->win, get_line_attr(LINE_MAIN_HEAD));
-+			enum line_type type;
-+
-+			if (commit->refs[i]->head)
-+				type = LINE_MAIN_HEAD;
- 			else if (commit->refs[i]->ltag)
--				wattrset(view->win, get_line_attr(LINE_MAIN_LOCAL_TAG));
-+				type = LINE_MAIN_LOCAL_TAG;
- 			else if (commit->refs[i]->tag)
--				wattrset(view->win, get_line_attr(LINE_MAIN_TAG));
-+				type = LINE_MAIN_TAG;
- 			else if (commit->refs[i]->tracked)
--				wattrset(view->win, get_line_attr(LINE_MAIN_TRACKED));
-+				type = LINE_MAIN_TRACKED;
- 			else if (commit->refs[i]->remote)
--				wattrset(view->win, get_line_attr(LINE_MAIN_REMOTE));
-+				type = LINE_MAIN_REMOTE;
- 			else
--				wattrset(view->win, get_line_attr(LINE_MAIN_REF));
--
--			col += draw_text(view, "[", view->width - col, TRUE, selected);
--			col += draw_text(view, commit->refs[i]->name, view->width - col,
--					 TRUE, selected);
--			col += draw_text(view, "]", view->width - col, TRUE, selected);
--			if (type != LINE_CURSOR)
--				wattrset(view->win, A_NORMAL);
--			col += draw_text(view, " ", view->width - col, TRUE, selected);
--			if (col >= view->width)
-+				type = LINE_MAIN_REF;
-+
-+			if (draw_text(view, type, "[", TRUE) ||
-+			    draw_text(view, type, commit->refs[i]->name, TRUE) ||
-+			    draw_text(view, type, "]", TRUE))
-+				return TRUE;
-+
-+			if (draw_text(view, LINE_DEFAULT, " ", TRUE))
- 				return TRUE;
- 		} while (commit->refs[i++]->next);
- 	}
- 
--	if (type != LINE_CURSOR)
--		wattrset(view->win, get_line_attr(type));
--
--	draw_text(view, commit->title, view->width - col, TRUE, selected);
-+	draw_text(view, LINE_DEFAULT, commit->title, TRUE);
- 	return TRUE;
- }
- 
-@@ -4932,6 +4983,14 @@ main_read(struct view *view, char *line)
- 	if (!line) {
- 		if (!view->lines && !view->parent)
- 			die("No revisions match the given arguments.");
-+		if (view->lines > 0) {
-+			commit = view->line[view->lines - 1].data;
-+			if (!*commit->author) {
-+				view->lines--;
-+				free(commit);
-+				graph->commit = NULL;
-+			}
-+		}
- 		update_rev_graph(graph);
- 		return TRUE;
- 	}
-@@ -5061,10 +5120,26 @@ main_request(struct view *view, enum request request, struct line *line)
- }
- 
- static bool
-+grep_refs(struct ref **refs, regex_t *regex)
-+{
-+	regmatch_t pmatch;
-+	size_t i = 0;
-+
-+	if (!refs)
-+		return FALSE;
-+	do {
-+		if (regexec(regex, refs[i]->name, 1, &pmatch, 0) != REG_NOMATCH)
-+			return TRUE;
-+	} while (refs[i++]->next);
-+
-+	return FALSE;
-+}
-+
-+static bool
- main_grep(struct view *view, struct line *line)
- {
- 	struct commit *commit = line->data;
--	enum { S_TITLE, S_AUTHOR, S_DATE, S_END } state;
-+	enum { S_TITLE, S_AUTHOR, S_DATE, S_REFS, S_END } state;
- 	char buf[DATE_COLS + 1];
- 	regmatch_t pmatch;
- 
-@@ -5073,13 +5148,24 @@ main_grep(struct view *view, struct line *line)
+ 	for (state = S_STATUS; state < S_END; state++) {
+-		char *text;
++		const char *text;
  
  		switch (state) {
- 		case S_TITLE:	text = commit->title;	break;
--		case S_AUTHOR:	text = commit->author;	break;
-+		case S_AUTHOR:
-+			if (!opt_author)
-+				continue;
-+			text = commit->author;
-+			break;
- 		case S_DATE:
-+			if (!opt_date)
-+				continue;
- 			if (!strftime(buf, sizeof(buf), DATE_FORMAT, &commit->time))
- 				continue;
- 			text = buf;
- 			break;
--
-+		case S_REFS:
-+			if (!opt_show_refs)
-+				continue;
-+			if (grep_refs(commit->refs, view->regex) == TRUE)
-+				return TRUE;
-+			continue;
- 		default:
- 			return FALSE;
- 		}
-@@ -5216,13 +5302,14 @@ utf8_to_unicode(const char *string, size_t length)
-  *
-  * Returns the number of bytes to output from string to satisfy max_width. */
- static size_t
--utf8_length(const char *string, size_t max_width, int *trimmed, bool reserve)
-+utf8_length(const char *string, int *width, size_t max_width, int *trimmed, bool reserve)
+ 		case S_NAME:	text = status->new.name;	break;
+@@ -4551,7 +4548,7 @@ static struct view_ops status_ops = {
+ static bool
+ stage_diff_line(FILE *pipe, struct line *line)
  {
- 	const char *start = string;
- 	const char *end = strchr(string, '\0');
- 	unsigned char last_bytes = 0;
--	size_t width = 0;
-+	size_t last_ucwidth = 0;
+-	char *buf = line->data;
++	const char *buf = line->data;
+ 	size_t bufsize = strlen(buf);
+ 	size_t written = 0;
  
-+	*width = 0;
- 	*trimmed = 0;
- 
- 	while (string < end) {
-@@ -5243,17 +5330,20 @@ utf8_length(const char *string, size_t max_width, int *trimmed, bool reserve)
- 			break;
- 
- 		ucwidth = unicode_width(unicode);
--		width  += ucwidth;
--		if (width > max_width) {
-+		*width  += ucwidth;
-+		if (*width > max_width) {
- 			*trimmed = 1;
--			if (reserve && width - ucwidth == max_width) {
-+			*width -= ucwidth;
-+			if (reserve && *width == max_width) {
- 				string -= last_bytes;
-+				*width -= last_ucwidth;
- 			}
- 			break;
- 		}
- 
- 		string  += bytes;
- 		last_bytes = bytes;
-+		last_ucwidth = ucwidth;
- 	}
- 
- 	return string - start;
-@@ -5365,6 +5455,11 @@ init_display(void)
- 	/* Enable keyboard mapping */
- 	keypad(status_win, TRUE);
- 	wbkgdset(status_win, get_line_attr(LINE_STATUS));
-+
-+	TABSIZE = opt_tab_size;
-+	if (opt_line_graphics) {
-+		line_graphics[LINE_GRAPHIC_VLINE] = ACS_VLINE;
-+	}
+@@ -4874,7 +4871,7 @@ done_rev_graph(struct rev_graph *graph)
  }
  
- static char *
-@@ -5773,11 +5868,12 @@ main(int argc, char *argv[])
- 	if (load_git_config() == ERR)
- 		die("Failed to load repo config.");
+ static void
+-push_rev_graph(struct rev_graph *graph, char *parent)
++push_rev_graph(struct rev_graph *graph, const char *parent)
+ {
+ 	int i;
  
--	if (!parse_options(argc, argv))
-+	request = parse_options(argc, argv);
-+	if (request == REQ_NONE)
- 		return 0;
+@@ -5531,13 +5528,13 @@ init_display(void)
+ 	/* Initialize the curses library */
+ 	if (isatty(STDIN_FILENO)) {
+ 		cursed = !!initscr();
++		opt_tty = stdin;
+ 	} else {
+ 		/* Leave stdin and stdout alone when acting as a pager. */
+-		FILE *io = fopen("/dev/tty", "r+");
+-
+-		if (!io)
++		opt_tty = fopen("/dev/tty", "r+");
++		if (!opt_tty)
+ 			die("Failed to open /dev/tty");
+-		cursed = !!newterm(NULL, io, io);
++		cursed = !!newterm(NULL, opt_tty, opt_tty);
+ 	}
  
- 	/* Require a git repository unless when running in pager mode. */
--	if (!opt_git_dir[0] && opt_request != REQ_VIEW_PAGER)
-+	if (!opt_git_dir[0] && request != REQ_VIEW_PAGER)
- 		die("Not a git repository");
+ 	if (!cursed)
+@@ -5698,8 +5695,27 @@ static struct ref ***id_refs = NULL;
+ static size_t id_refs_alloc = 0;
+ static size_t id_refs_size = 0;
  
- 	if (*opt_encoding && strcasecmp(opt_encoding, "UTF-8"))
-@@ -5795,8 +5891,6 @@ main(int argc, char *argv[])
- 	for (i = 0; i < ARRAY_SIZE(views) && (view = &views[i]); i++)
++static int
++compare_refs(const void *ref1_, const void *ref2_)
++{
++	const struct ref *ref1 = *(const struct ref **)ref1_;
++	const struct ref *ref2 = *(const struct ref **)ref2_;
++
++	if (ref1->tag != ref2->tag)
++		return ref2->tag - ref1->tag;
++	if (ref1->ltag != ref2->ltag)
++		return ref2->ltag - ref2->ltag;
++	if (ref1->head != ref2->head)
++		return ref2->head - ref1->head;
++	if (ref1->tracked != ref2->tracked)
++		return ref2->tracked - ref1->tracked;
++	if (ref1->remote != ref2->remote)
++		return ref2->remote - ref1->remote;
++	return strcmp(ref1->name, ref2->name);
++}
++
+ static struct ref **
+-get_refs(char *id)
++get_refs(const char *id)
+ {
+ 	struct ref ***tmp_id_refs;
+ 	struct ref **ref_list = NULL;
+@@ -5733,19 +5749,20 @@ get_refs(char *id)
+ 		}
+ 
+ 		ref_list = tmp;
+-		if (ref_list_size > 0)
+-			ref_list[ref_list_size - 1]->next = 1;
+ 		ref_list[ref_list_size] = &refs[i];
+-
+ 		/* XXX: The properties of the commit chains ensures that we can
+ 		 * safely modify the shared ref. The repo references will
+ 		 * always be similar for the same id. */
+-		ref_list[ref_list_size]->next = 0;
++		ref_list[ref_list_size]->next = 1;
++
+ 		ref_list_size++;
+ 	}
+ 
+-	if (ref_list)
++	if (ref_list) {
++		qsort(ref_list, ref_list_size, sizeof(*ref_list), compare_refs);
++		ref_list[ref_list_size - 1]->next = 0;
+ 		id_refs[id_refs_size++] = ref_list;
++	}
+ 
+ 	return ref_list;
+ }
+@@ -5761,7 +5778,7 @@ read_ref(char *id, size_t idlen, char *name, size_t namelen)
+ 	bool check_replace = FALSE;
+ 	bool head = FALSE;
+ 
+-	if (!strncmp(name, "refs/tags/", STRING_SIZE("refs/tags/"))) {
++	if (!prefixcmp(name, "refs/tags/")) {
+ 		if (!strcmp(name + namelen - 3, "^{}")) {
+ 			namelen -= 3;
+ 			name[namelen] = 0;
+@@ -5775,13 +5792,13 @@ read_ref(char *id, size_t idlen, char *name, size_t namelen)
+ 		namelen -= STRING_SIZE("refs/tags/");
+ 		name	+= STRING_SIZE("refs/tags/");
+ 
+-	} else if (!strncmp(name, "refs/remotes/", STRING_SIZE("refs/remotes/"))) {
++	} else if (!prefixcmp(name, "refs/remotes/")) {
+ 		remote = TRUE;
+ 		namelen -= STRING_SIZE("refs/remotes/");
+ 		name	+= STRING_SIZE("refs/remotes/");
+ 		tracked  = !strcmp(opt_remote, name);
+ 
+-	} else if (!strncmp(name, "refs/heads/", STRING_SIZE("refs/heads/"))) {
++	} else if (!prefixcmp(name, "refs/heads/")) {
+ 		namelen -= STRING_SIZE("refs/heads/");
+ 		name	+= STRING_SIZE("refs/heads/");
+ 		head	 = !strncmp(opt_head, name, namelen);
+@@ -5794,7 +5811,7 @@ read_ref(char *id, size_t idlen, char *name, size_t namelen)
+ 	if (check_replace && !strcmp(name, refs[refs_size - 1].name)) {
+ 		/* it's an annotated tag, replace the previous sha1 with the
+ 		 * resolved commit id; relies on the fact git-ls-remote lists
+-		 * the commit id of an annotated tag right beofre the commit id
++		 * the commit id of an annotated tag right before the commit id
+ 		 * it points to. */
+ 		refs[refs_size - 1].ltag = ltag;
+ 		string_copy_rev(refs[refs_size - 1].id, id);
+@@ -5861,7 +5878,7 @@ read_repo_config_option(char *name, size_t namelen, char *value, size_t valuelen
+ 	    !strcmp(name + 7 + strlen(opt_head), ".merge")) {
+ 		size_t from = strlen(opt_remote);
+ 
+-		if (!strncmp(value, "refs/heads/", STRING_SIZE("refs/heads/"))) {
++		if (!prefixcmp(value, "refs/heads/")) {
+ 			value += STRING_SIZE("refs/heads/");
+ 			valuelen -= STRING_SIZE("refs/heads/");
+ 		}
+@@ -5897,7 +5914,7 @@ read_repo_info(char *name, size_t namelen, char *value, size_t valuelen)
+ 	} else if (opt_cdup[0] == ' ') {
+ 		string_ncopy(opt_cdup, name, namelen);
+ 	} else {
+-		if (!strncmp(name, "refs/heads/", STRING_SIZE("refs/heads/"))) {
++		if (!prefixcmp(name, "refs/heads/")) {
+ 			namelen -= STRING_SIZE("refs/heads/");
+ 			name	+= STRING_SIZE("refs/heads/");
+ 			string_ncopy(opt_head, name, namelen);
+@@ -6009,7 +6026,7 @@ warn(const char *msg, ...)
+ }
+ 
+ int
+-main(int argc, char *argv[])
++main(int argc, const char *argv[])
+ {
+ 	struct view *view;
+ 	enum request request;
+@@ -6052,7 +6069,7 @@ main(int argc, char *argv[])
+ 	if (load_refs() == ERR)
+ 		die("Failed to load refs.");
+ 
+-	for (i = 0; i < ARRAY_SIZE(views) && (view = &views[i]); i++)
++	foreach_view (view, i)
  		view->cmd_env = getenv(view->cmd_env);
  
--	request = opt_request;
--
  	init_display();
+@@ -6063,6 +6080,7 @@ main(int argc, char *argv[])
  
- 	while (view_driver(display[current_view], request)) {
-@@ -5827,11 +5921,13 @@ main(int argc, char *argv[])
+ 		foreach_view (view, i)
+ 			update_view(view);
++		view = display[current_view];
  
- 			if (cmd && string_format(opt_cmd, "git %s", cmd)) {
- 				if (strncmp(cmd, "show", 4) && isspace(cmd[4])) {
--					opt_request = REQ_VIEW_DIFF;
-+					request = REQ_VIEW_DIFF;
- 				} else {
--					opt_request = REQ_VIEW_PAGER;
-+					request = REQ_VIEW_PAGER;
- 				}
--				break;
-+
-+				/* Always reload^Wrerun commands from the prompt. */
-+				open_view(view, request, OPEN_RELOAD);
- 			}
+ 		/* Refresh, accept single keystroke of input */
+ 		key = wgetch(status_win);
+@@ -6074,7 +6092,7 @@ main(int argc, char *argv[])
+ 			continue;
+ 		}
  
- 			request = REQ_NONE;
-diff --git a/tigrc.5.txt b/tigrc.5.txt
-index 369fc65..471aab3 100644
---- a/tigrc.5.txt
-+++ b/tigrc.5.txt
-@@ -47,6 +47,8 @@ set show-date = yes		# Show commit date?
- set show-rev-graph = yes	# Show revision graph?
- set show-refs = yes		# Show references?
- set show-line-numbers = no	# Show line numbers?
-+set author-width = 10		# Set width of the author column
-+set line-graphics = no		# Disable graphics characters
- set line-number-interval = 5	# Interval between line numbers
- set tab-size = 8		# Number of spaces per tab
- set encoding = "UTF-8"		# Commit encoding
-@@ -81,6 +83,14 @@ The following variables can be set:
- 	(branches, tags, and remotes) in the main view on start-up. Can all be
- 	toggled.
+-		request = get_keybinding(display[current_view]->keymap, key);
++		request = get_keybinding(view->keymap, key);
  
-+'author-width' (int)::
-+
-+	Width of the author column.
-+
-+'line-graphics' (bool)::
-+
-+	Whether to use graphic characters for line drawing.
-+
- 'line-number-interval' (int)::
+ 		/* Some low-level request handling. This keeps access to
+ 		 * status_win restricted. */
+@@ -6100,8 +6118,7 @@ main(int argc, char *argv[])
+ 		case REQ_SEARCH:
+ 		case REQ_SEARCH_BACK:
+ 		{
+-			const char *prompt = request == REQ_SEARCH
+-					   ? "/" : "?";
++			const char *prompt = request == REQ_SEARCH ? "/" : "?";
+ 			char *search = read_prompt(prompt);
  
- 	Interval between line numbers. Note, you have to toggle on line
-@@ -259,6 +269,7 @@ toggle-rev-graph	Toggle revision graph visualization
- toggle-refs		Toggle reference display
- status-update		Update file status
- status-merge		Resolve unmerged file
-+stage-next		Find next chunk to stage
- tree-parent		Switch to parent directory in tree view
- edit			Open in editor
- ------------------------------------------------------------------------------
-@@ -343,6 +354,7 @@ Main view colors:
- ------------------------------------------------------------------------------
- main-author		The commit author.
- main-revgraph		The revision graph.
-+main-commit		The commit comment.
- main-head		Label of the current branch.
- main-remote		Label of a remote.
- main-tracked		Label of the remote tracked by the current branch.
-@@ -431,4 +443,4 @@ Licensed under the terms of the GNU General Public License.
- 
- SEE ALSO
- --------
--gitlink:tig[1] and the http://jonas.nitro.dk/tig/manual.html[tig manual].
-+manpage:tig[1] and the http://jonas.nitro.dk/tig/manual.html[tig manual].
+ 			if (search)
