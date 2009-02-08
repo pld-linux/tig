@@ -1,0 +1,11 @@
+--- tig-0.4/tig.c.old	2006-07-21 20:21:12.189472944 +0200
++++ tig-0.4/tig.c	2006-07-21 20:21:25.276483416 +0200
+@@ -30,7 +30,7 @@
+ #include <unistd.h>
+ #include <time.h>
+ 
+-#include <curses.h>
++#include <ncurses/curses.h>
+ 
+ static void die(const char *err, ...);
+ static void report(const char *msg, ...);
