@@ -2,7 +2,7 @@ Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
 Version:	0.14.1
-Release:	2
+Release:	3
 License:	GPL v2
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
@@ -52,7 +52,7 @@ Pakiet ten dostarcza bashowe uzupełnianie nazw dla tiga.
 %build
 %{__make} \
 	CC="%{__cc}" \
-	CFLAGS="%{rpmcflags} %{rpmldflags} -I/usr/include/ncurses" \
+	CFLAGS="%{rpmcflags} %{rpmldflags} -I/usr/include/ncursesw" \
 	LDLIBS=-lncursesw
 
 %install
