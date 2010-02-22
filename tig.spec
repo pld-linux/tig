@@ -8,7 +8,6 @@ Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	8f373a99823f6db241b66642075657d3
 URL:		http://jonas.nitro.dk/tig/
-Patch0:		tig-git.patch
 BuildRequires:	asciidoc
 BuildRequires:	ncurses-devel
 Requires:	git-core
@@ -48,7 +47,6 @@ Pakiet ten dostarcza bashowe uzupełnianie nazw dla tiga.
 
 %prep
 %setup -q
-#%patch0 -p1
 
 %build
 %{__make} \
