@@ -8,7 +8,6 @@ Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	8f373a99823f6db241b66642075657d3
 URL:		http://jonas.nitro.dk/tig/
-BuildRequires:	asciidoc
 BuildRequires:	ncurses-devel
 Requires:	git-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -36,7 +35,7 @@ wejścia.
 %package -n bash-completion-tig
 Summary:	bash-completion for tig
 Summary(pl.UTF-8):	bashowe uzupełnianie nazw dla tiga
-Group:		Applications/Shell
+Group:		Applications/Shells
 Requires:	bash-completion
 
 %description -n bash-completion-tig
@@ -72,7 +71,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc BUGS README TODO *.html contrib/tigrc
-%attr(755,root,root) %{_bindir}/*
+%attr(755,root,root) %{_bindir}/tig
 %{_mandir}/man*/*
 
 %files -n bash-completion-tig
