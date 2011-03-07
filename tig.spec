@@ -1,12 +1,12 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	0.16.2
+Version:	0.17
 Release:	1
-License:	GPL v2
+License:	GPL v2+
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	d72b5d3437dbc538ea6f66c74988d75e
+# Source0-md5:	f373343199422c59518776db448dec0e
 URL:		http://jonas.nitro.dk/tig/
 BuildRequires:	ncurses-devel
 Requires:	git-core
@@ -63,7 +63,7 @@ install -d $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
 	prefix=%{_prefix}
 
 # bash completion
-install contrib/tig-completion.bash $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
+cp -a contrib/tig-completion.bash $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -72,7 +72,10 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc BUGS README TODO *.html contrib/tigrc
 %attr(755,root,root) %{_bindir}/tig
-%{_mandir}/man*/*
+%attr(755,root,root) %{_bindir}/test-graph
+%{_mandir}/man1/tig.1*
+%{_mandir}/man5/tigrc.5*
+%{_mandir}/man7/tigmanual.7*
 
 %files -n bash-completion-tig
 %defattr(644,root,root,755)
