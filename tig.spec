@@ -1,12 +1,12 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	0.17
+Version:	0.18
 Release:	1
 License:	GPL v2+
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	f373343199422c59518776db448dec0e
+# Source0-md5:	4fa9e33c5daa76b6fed11e068405356f
 URL:		http://jonas.nitro.dk/tig/
 BuildRequires:	ncurses-devel
 Requires:	git-core
@@ -48,10 +48,10 @@ Pakiet ten dostarcza bashowe uzupełnianie nazw dla tiga.
 %setup -q
 
 %build
-%{__make} \
-	CC="%{__cc}" \
-	CFLAGS="%{rpmcflags} %{rpmldflags} -I/usr/include/ncursesw" \
-	LDLIBS=-lncursesw
+CFLAGS="%{rpmcflags} %{rpmldflags} -I/usr/include/ncursesw"
+export CFLAGS
+LIBS=-ltinfow %configure
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -72,7 +72,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc BUGS README TODO *.html contrib/tigrc
 %attr(755,root,root) %{_bindir}/tig
-%attr(755,root,root) %{_bindir}/test-graph
+#%attr(755,root,root) %{_bindir}/test-graph
 %{_mandir}/man1/tig.1*
 %{_mandir}/man5/tigrc.5*
 %{_mandir}/man7/tigmanual.7*
