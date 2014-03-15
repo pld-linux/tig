@@ -37,6 +37,9 @@ Summary:	bash-completion for tig
 Summary(pl.UTF-8):	bashowe uzupełnianie nazw dla tiga
 Group:		Applications/Shells
 Requires:	bash-completion
+%if "%{_rpmversion}" >= "5"
+BuildArch:	noarch
+%endif
 
 %description -n bash-completion-tig
 This package provides bash-completion for tig.
