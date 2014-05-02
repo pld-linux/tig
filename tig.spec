@@ -1,12 +1,12 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	1.2.1
+Version:	2.0.1
 Release:	1
 License:	GPL v2+
 Group:		Development/Tools
 Source0:	http://jonas.nitro.dk/tig/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	9dec2966d3d51f7d8b5b8d4a4b8d93eb
+# Source0-md5:	e0b3bc47b8c2c1e556ae953c0b30faab
 URL:		http://jonas.nitro.dk/tig/
 BuildRequires:	ncurses-devel
 Requires:	git-core
@@ -54,7 +54,7 @@ Pakiet ten dostarcza bashowe uzupełnianie nazw dla tiga.
 CFLAGS="%{rpmcflags} %{rpmldflags} -I/usr/include/ncursesw"
 export CFLAGS
 LIBS=-ltinfow %configure
-%{__make}
+%{__make} V=1
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -64,6 +64,7 @@ install -d $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
 	DESTDIR=$RPM_BUILD_ROOT \
 	mandir=%{_mandir} \
 	prefix=%{_prefix}
+	sysconfdir=%{_sysconfdir}
 
 # bash completion
 cp -a contrib/tig-completion.bash $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
@@ -73,7 +74,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc BUGS README *.html contrib/tigrc
+%doc *.html
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/tigrc
 %attr(755,root,root) %{_bindir}/tig
 #%attr(755,root,root) %{_bindir}/test-graph
 %{_mandir}/man1/tig.1*
