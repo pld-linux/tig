@@ -1,12 +1,12 @@
 Summary:	Text-mode interface for git-core
 Summary(pl.UTF-8):	Tekstowy interfejs do git-core
 Name:		tig
-Version:	2.5.3
+Version:	2.5.4
 Release:	1
 License:	GPL v2+
 Group:		Development/Tools
 Source0:	https://github.com/jonas/tig/releases/download/%{name}-%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	ceec1ec9a93fd70de81a613c1b368631
+# Source0-md5:	f7986e3361cf1c2265982d6b4451c79a
 URL:		https://jonas.github.io/tig/
 BuildRequires:	ncurses-devel
 BuildRequires:	pkgconfig
