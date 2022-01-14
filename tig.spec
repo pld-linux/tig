@@ -12,6 +12,7 @@ BuildRequires:	ncurses-devel
 BuildRequires:	pcre2-posix-devel
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
+BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
 Requires:	git-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
